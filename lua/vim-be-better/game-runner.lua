@@ -6,6 +6,9 @@ local HjklRound = require("vim-be-better.games.hjkl");
 local WhackAMoleRound = require("vim-be-better.games.whackamole");
 local Snake = require("vim-be-better.games.snake");
 local PlaceholderGame = require("vim-be-better.games.placeholder");
+
+package.loaded["vim-be-better.games.navigation.find-char"] = nil
+local FindCharRound = require("vim-be-better.games.navigation.find-char");
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
 
@@ -51,7 +54,7 @@ local classicGames = {
 local newGames = {
     -- Navigation
     ["find-char"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Find Character")
+        return FindCharRound:new(difficulty, window)
     end,
     ["word-boundaries"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Word Boundaries")
@@ -151,6 +154,13 @@ local GameRunner = {}
 
 local function getGame(game, difficulty, window)
     log.info("getGame", game, difficulty, window)
+
+    -- Wymusić przeładowanie find-char za każdym razem
+    if game == "find-char" then
+        package.loaded["vim-be-better.games.navigation.find-char"] = nil
+        FindCharRound = require("vim-be-better.games.navigation.find-char")
+        log.info("getGame - Force reloaded find-char module")
+    end
 
     if not games[game] then
         log.warn("Game not found, using placeholder:", game)
@@ -407,8 +417,9 @@ function GameRunner:run()
         "Round %d / %d", self.currentRound, self.config.roundCount))
 
     if roundConfig.canEndRound then
-        self.round:setEndRoundCallback(function() self:endRound() end)
+        self.round:setEndRoundCallback(function(success) self:endRound(success) end)
     end
+
     self.window.buffer:setInstructions(self.round:getInstructions())
     local lines, cursorLine, cursorCol = self.round:render()
     self.window.buffer:render(lines)
