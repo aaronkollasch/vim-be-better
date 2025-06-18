@@ -1,7 +1,7 @@
-local log = require("vim-be-good.log")
-local bind = require("vim-be-good.bind")
-local types = require("vim-be-good.types")
-local createEmpty = require("vim-be-good.game-utils").createEmpty
+local log = require("vim-be-better.log")
+local bind = require("vim-be-better.bind")
+local types = require("vim-be-better.types")
+local createEmpty = require("vim-be-better.game-utils").createEmpty
 
 local Menu = {}
 
@@ -19,7 +19,7 @@ local difficultyHeader = {
 }
 
 local instructions = {
-    "VimBeGood is a collection of small games for neovim which are",
+    "VimBebetter is a collection of small games for neovim which are",
     "intended to help you improve your vim proficiency.",
     "delete a line to select the line.  If you delete a difficulty,",
     "it will select that difficulty, but if you delete a game it ",
@@ -33,7 +33,7 @@ local credits = {
     "Brandoncc",
     "polarmutex",
     "",
-    "https://github.com/ThePrimeagen/vim-be-good",
+    "https://github.com/ThePrimeagen/vim-be-better",
     "https://twitch.tv/ThePrimeagen",
 }
 
