@@ -1,11 +1,24 @@
 local log = require("vim-be-better.log")
 local bind = require("vim-be-better.bind")
 local types = require("vim-be-better.types")
-local createEmpty = require("vim-be-better.game-utils").createEmpty
 
 local Menu = {}
 
-local gameHeader = {
+local MENU_STATES = {
+    MAIN = "main",
+    CATEGORY = "category",
+    DIFFICULTY = "difficulty"
+}
+
+local mainMenuHeader = {
+    "",
+    "🎮 VIM BE BETTER - Select Category",
+    "==================================",
+    "(delete a line to select)",
+    ""
+}
+
+local categoryHeader = {
     "",
     "Select a Game (delete from the list to select)",
     "----------------------------------------------",
@@ -19,22 +32,30 @@ local difficultyHeader = {
 }
 
 local instructions = {
-    "VimBebetter is a collection of small games for neovim which are",
-    "intended to help you improve your vim proficiency.",
-    "delete a line to select the line.  If you delete a difficulty,",
-    "it will select that difficulty, but if you delete a game it ",
-    "will start the game."
+    "VimBeBetter is a collection of categorized mini-games for neovim",
+    "designed to systematically improve your vim proficiency.",
+    "",
+    "🎯 Navigation        - Master vim movement commands",
+    "✂️ Text Objects      - Learn powerful text manipulation",
+    "🔄 Substitution      - Master find & replace operations",
+    "📝 Formatting        - Text formatting and structure",
+    "🔍 Search            - Advanced search techniques",
+    "🎨 Visual Mode       - Selection and visual operations",
+    "🔢 Numbers           - Numeric operations and sequences",
+    "🏗️ Advanced          - Macros, folds, and complex features",
+    "🎪 Challenges        - Mixed skill challenges",
+    "📚 Classics (legacy) - Original vim-be-good games",
+    "",
+    "Navigation: Use hjkl, delete line (dd) to select"
 }
 
 local credits = {
     "",
     "",
-    "Created by ThePrimeagen",
-    "Brandoncc",
-    "polarmutex",
+    "Extended by Szymon Wilczek",
+    "Based on vim-be-good by ThePrimeagen",
     "",
-    "https://github.com/ThePrimeagen/vim-be-better",
-    "https://twitch.tv/ThePrimeagen",
+    "https://github.com/your-username/vim-be-better",
 }
 
 function Menu:new(window, onResults)
@@ -43,11 +64,11 @@ function Menu:new(window, onResults)
         buffer = window.buffer,
         onResults = onResults,
 
-        -- easy
-        difficulty = types.difficulty[2],
+        state = MENU_STATES.MAIN,
+        selectedCategory = nil,
+        selectedGame = nil,
 
-        -- relative
-        game = types.games[1],
+        difficulty = types.difficulty[2], -- easy
     }
 
     window.buffer:clear()
@@ -62,104 +83,191 @@ function Menu:new(window, onResults)
     return createdMenu
 end
 
-local function getMenuLength()
-    return #types.games + #types.difficulty + #gameHeader +
-        #difficultyHeader + #credits
-end
+function Menu:showMainMenu()
+    self.state = MENU_STATES.MAIN
+    self.selectedCategory = nil
+    self.selectedGame = nil
 
-local function getTableChanges(lines, compareSet, startIdx)
-    local maxCount = #lines
-    local idx = startIdx
-    local i = 1
-    local found = false
+    local lines = {}
 
-    while found == false and idx <= maxCount and i <= #compareSet do
-        if lines[idx] == nil or lines[idx]:find(compareSet[i], 1, true) == nil then
-            found = true
-        else
-            i = i + 1
-            idx = idx + 1
-        end
+    for _, line in ipairs(mainMenuHeader) do
+        table.insert(lines, line)
     end
 
-    return found, i, idx
+    for i, category in ipairs(types.categories) do
+        table.insert(lines, "[ ] " .. category)
+    end
+
+    table.insert(lines, "")
+    table.insert(lines, "[ ] 🚪 Exit")
+
+    for _, line in ipairs(credits) do
+        table.insert(lines, line)
+    end
+
+    self.window.buffer:render(lines)
+end
+
+function Menu:showCategoryMenu(categoryIndex)
+    self.state = MENU_STATES.CATEGORY
+    self.selectedCategory = categoryIndex
+
+    local lines = {}
+
+    for _, line in ipairs(categoryHeader) do
+        table.insert(lines, line)
+    end
+
+    table.insert(lines, "Category: " .. types.categories[categoryIndex])
+    table.insert(lines, "")
+
+    local categoryGames = types.getGamesByCategory(categoryIndex)
+    for _, game in ipairs(categoryGames) do
+        table.insert(lines, "[ ] " .. game)
+    end
+
+    table.insert(lines, "")
+    table.insert(lines, "[ ] ⬅️ Back to Categories")
+    table.insert(lines, "[ ] 🚪 Exit")
+
+    self.window.buffer:render(lines)
+end
+
+function Menu:showDifficultyMenu(game)
+    self.state = MENU_STATES.DIFFICULTY
+    self.selectedGame = game
+
+    local lines = {}
+
+    for _, line in ipairs(difficultyHeader) do
+        table.insert(lines, line)
+    end
+
+    table.insert(lines, "Selected Game: " .. game)
+    table.insert(lines, "")
+
+    for _, difficulty in ipairs(types.difficulty) do
+        local marker = (difficulty == self.difficulty) and "[x]" or "[ ]"
+        table.insert(lines, marker .. " " .. difficulty)
+    end
+
+    table.insert(lines, "")
+    table.insert(lines, "[ ] ⬅️ Back to Games")
+    table.insert(lines, "[ ] 🏠 Main Menu")
+    table.insert(lines, "[ ] 🚪 Exit")
+
+    self.window.buffer:render(lines)
 end
 
 function Menu:onChange()
     local lines = self.window.buffer:getGameLines()
-    local maxCount = getMenuLength()
 
-    if #lines == maxCount then
-        return
-    end
-
-    local found, i, idx = getTableChanges(lines, gameHeader, 1)
-    log.info("Menu:onChange initial instructions", found, i, idx)
-    if found then
-        self:render()
-        return
-    end
-
-    found, i, idx = getTableChanges(lines, types.games, idx)
-    log.info("Menu:onChange game changes", found, i, idx)
-    if found then
-        self.game = types.games[i]
-
-        log.info("Starting Game", self.game, self.difficulty)
-        ok, msg = pcall(self.onResults, self.game, self.difficulty)
-
-        if not ok then
-            log.info("Menu:onChange error", msg)
-        end
-        return
-    end
-
-    found, i, idx = getTableChanges(lines, difficultyHeader, idx)
-    if found then
-        self:render()
-        return
-    end
-
-    found, i, idx = getTableChanges(lines, types.difficulty, idx)
-    if found then
-        self.difficulty = types.difficulty[i]
-        self:render()
-        return
+    if self.state == MENU_STATES.MAIN then
+        self:handleMainMenuChange(lines)
+    elseif self.state == MENU_STATES.CATEGORY then
+        self:handleCategoryMenuChange(lines)
+    elseif self.state == MENU_STATES.DIFFICULTY then
+        self:handleDifficultyMenuChange(lines)
     end
 end
 
-local function createMenuItem(str, currentValue)
-    if currentValue == str then
-        return "[x] " .. str
+function Menu:handleMainMenuChange(lines)
+    for i, category in ipairs(types.categories) do
+        local expectedLine = "[ ] " .. category
+        local found = false
+
+        for _, line in ipairs(lines) do
+            if line == expectedLine then
+                found = true
+                break
+            end
+        end
+
+        if not found then
+            self:showCategoryMenu(i)
+            return
+        end
     end
-    return "[ ] " .. str
+
+    local exitFound = false
+    for _, line in ipairs(lines) do
+        if line == "[ ] 🚪 Exit" then
+            exitFound = true
+            break
+        end
+    end
+
+    if not exitFound then
+        endItAll()
+    end
+end
+
+function Menu:handleCategoryMenuChange(lines)
+    if not self.selectedCategory then return end
+
+    local categoryGames = types.getGamesByCategory(self.selectedCategory)
+
+    for _, game in ipairs(categoryGames) do
+        local expectedLine = "[ ] " .. game
+        local found = false
+
+        for _, line in ipairs(lines) do
+            if line == expectedLine then
+                found = true
+                break
+            end
+        end
+
+        if not found then
+            self:showDifficultyMenu(game)
+            return
+        end
+    end
+
+    self:handleNavigationOptions(lines)
+end
+
+function Menu:handleDifficultyMenuChange(lines)
+    if not self.selectedGame then return end
+
+    for _, difficulty in ipairs(types.difficulty) do
+        local expectedLine = "[ ] " .. difficulty
+        local markedLine = "[x] " .. difficulty
+        local found = false
+
+        for _, line in ipairs(lines) do
+            if line == expectedLine or line == markedLine then
+                found = true
+                break
+            end
+        end
+
+        if not found then
+            log.info("Starting game:", self.selectedGame, "difficulty:", difficulty)
+            self.onResults(self.selectedGame, difficulty)
+            return
+        end
+    end
+
+    self:handleNavigationOptions(lines)
+end
+
+function Menu:handleNavigationOptions(lines)
+    for _, line in ipairs(lines) do
+        if line:match("⬅️ Back") then
+            return
+        end
+    end
+
+    if self.state == MENU_STATES.CATEGORY then
+        self:showMainMenu()
+    elseif self.state == MENU_STATES.DIFFICULTY then
+        self:showCategoryMenu(self.selectedCategory)
+    end
 end
 
 function Menu:render()
-    self.window.buffer:clearGameLines()
-
-    local lines = { }
-    for idx = 1, #gameHeader do
-        table.insert(lines, gameHeader[idx])
-    end
-
-    for idx = 1, #types.games do
-        table.insert(lines, createMenuItem(types.games[idx], self.game))
-    end
-
-    for idx = 1, #difficultyHeader do
-        table.insert(lines, difficultyHeader[idx])
-    end
-
-    for idx = 1, #types.difficulty do
-        table.insert(lines, createMenuItem(types.difficulty[idx], self.difficulty))
-    end
-
-    for idx = 1, #credits do
-        table.insert(lines, credits[idx])
-    end
-
-    self.window.buffer:render(lines)
+    self:showMainMenu()
 end
 
 function Menu:close()
@@ -167,4 +275,3 @@ function Menu:close()
 end
 
 return Menu
-
