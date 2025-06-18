@@ -2,20 +2,27 @@ local log = require("vim-be-better.log")
 local bind = require("vim-be-better.bind")
 local types = require("vim-be-better.types")
 
+-- log configuration - I HAVE TO DELETE THIS IN PRODUCTIOn
 vim.g["vim_be_better_log_file"] = true
 vim.g["vim_be_better_log_console"] = false
 
 local Menu = {}
 
+local categoryHeader = {
+    "",
+    "Select a Game Category (select with [x])",
+    "----------------------------------------",
+}
+
 local gameHeader = {
     "",
-    "Select a Game (delete from the list to select)",
-    "----------------------------------------------",
+    "Select a Game (select with [x])",
+    "-------------------------------",
 }
 
 local difficultyHeader = {
     "",
-    "Select a Difficulty (delete from the list to select)",
+    "Select a Difficulty (select with [x])",
     "Noob difficulty is endless so it must be quit with :q",
     "----------------------------------------------------",
 }
@@ -23,9 +30,8 @@ local difficultyHeader = {
 local instructions = {
     "VimBebetter is a collection of small games for neovim which are",
     "intended to help you improve your vim proficiency.",
-    "delete a line to select the line.  If you delete a difficulty,",
-    "it will select that difficulty, but if you delete a game it ",
-    "will start the game."
+    "First select a category, then a game, and finally a difficulty.",
+    "Change [x] to select options."
 }
 
 local credits = {
@@ -39,20 +45,23 @@ local credits = {
     "https://twitch.tv/ThePrimeagen",
 }
 
+local MenuState = {
+    CATEGORY_SELECTION = "category_selection",
+    GAME_SELECTION = "game_selection",
+    DIFFICULTY_SELECTION = "difficulty_selection"
+}
+
 function Menu:new(window, onResults)
     local menuObj = {
         window = window,
         buffer = window.buffer,
         onResults = onResults,
-
+        currentState = MenuState.CATEGORY_SELECTION,
+        selectedCategory = nil,
+        selectedGame = nil,
         difficulty = types.difficulty[2],
-
-        game = types.games[1],
-
         lastRenderedLines = {},
-
         isRerendering = false,
-
         lineTypeMap = {},
     }
 
@@ -65,37 +74,60 @@ function Menu:new(window, onResults)
     createdMenu._onChange = bind(createdMenu, "onChange")
     window.buffer:onChange(createdMenu._onChange)
 
-    log.info("Menu:new - Menu utworzone pomyślnie", "difficulty:", menuObj.difficulty, "game:", menuObj.game)
+    log.info("Menu:new - Menu utworzone pomyślnie",
+        "state:", menuObj.currentState,
+        "difficulty:", menuObj.difficulty)
 
     return createdMenu
 end
 
-local function getExpectedMenuLength()
-    return #gameHeader + #types.games + #difficultyHeader + #types.difficulty + #credits
+function Menu:getExpectedMenuLength()
+    if self.currentState == MenuState.CATEGORY_SELECTION then
+        return #categoryHeader + #types.categories + #credits
+    elseif self.currentState == MenuState.GAME_SELECTION then
+        local gamesInCategory = types.gamesByCategory[self.selectedCategory] or {}
+        return #gameHeader + #gamesInCategory + #credits
+    elseif self.currentState == MenuState.DIFFICULTY_SELECTION then
+        return #difficultyHeader + #types.difficulty + #credits
+    end
+    return 0
 end
 
 function Menu:buildLineTypeMap()
     local map = {}
     local lineIndex = 1
 
-    for i = 1, #gameHeader do
-        map[lineIndex] = { type = "game_header", index = i }
-        lineIndex = lineIndex + 1
-    end
+    if self.currentState == MenuState.CATEGORY_SELECTION then
+        for i = 1, #categoryHeader do
+            map[lineIndex] = { type = "category_header", index = i }
+            lineIndex = lineIndex + 1
+        end
 
-    for i = 1, #types.games do
-        map[lineIndex] = { type = "game", index = i, value = types.games[i] }
-        lineIndex = lineIndex + 1
-    end
+        for i = 1, #types.categories do
+            map[lineIndex] = { type = "category", index = i, value = types.categories[i] }
+            lineIndex = lineIndex + 1
+        end
+    elseif self.currentState == MenuState.GAME_SELECTION then
+        for i = 1, #gameHeader do
+            map[lineIndex] = { type = "game_header", index = i }
+            lineIndex = lineIndex + 1
+        end
 
-    for i = 1, #difficultyHeader do
-        map[lineIndex] = { type = "difficulty_header", index = i }
-        lineIndex = lineIndex + 1
-    end
+        local gamesInCategory = types.gamesByCategory[self.selectedCategory] or {}
+        for i = 1, #gamesInCategory do
+            map[lineIndex] = { type = "game", index = i, value = gamesInCategory[i] }
+            lineIndex = lineIndex + 1
+        end
+    elseif self.currentState == MenuState.DIFFICULTY_SELECTION then
+        for i = 1, #difficultyHeader do
+            map[lineIndex] = { type = "difficulty_header", index = i }
+            lineIndex = lineIndex + 1
+        end
 
-    for i = 1, #types.difficulty do
-        map[lineIndex] = { type = "difficulty", index = i, value = types.difficulty[i] }
-        lineIndex = lineIndex + 1
+        for i = 1, #types.difficulty do
+            map[lineIndex] = { type = "difficulty", index = i, value = types.difficulty[i] }
+            lineIndex = lineIndex + 1
+        end
     end
 
     for i = 1, #credits do
@@ -104,18 +136,20 @@ function Menu:buildLineTypeMap()
     end
 
     self.lineTypeMap = map
-    log.info("Menu:buildLineTypeMap - Mapa typów linii utworzona", "total_lines:", lineIndex - 1)
+    log.info("Menu:buildLineTypeMap - Mapa typów linii utworzona",
+        "state:", self.currentState,
+        "total_lines:", lineIndex - 1)
     return map
 end
 
 function Menu:detectChanges(currentLines)
-    local expectedLength = getExpectedMenuLength()
+    local expectedLength = self:getExpectedMenuLength()
     local currentLength = #currentLines
 
     log.info("Menu:detectChanges - Sprawdzanie zmian",
+        "state:", self.currentState,
         "expected_length:", expectedLength,
-        "current_length:", currentLength,
-        "last_rendered_length:", #self.lastRenderedLines)
+        "current_length:", currentLength)
 
     if currentLength ~= expectedLength then
         log.warn("Menu:detectChanges - Wykryto zmianę długości menu")
@@ -137,6 +171,11 @@ function Menu:detectChanges(currentLines)
                 "expected:", expectedLine,
                 "actual:", line)
 
+            if lineInfo.type == "category" then
+                log.info("Menu:detectChanges - Wykryto wybór kategorii", "category:", lineInfo.value)
+                return false, "category_selected", lineInfo.value
+            end
+
             if lineInfo.type == "game" then
                 log.info("Menu:detectChanges - Wykryto wybór gry", "game:", lineInfo.value)
                 return false, "game_selected", lineInfo.value
@@ -155,10 +194,14 @@ function Menu:detectChanges(currentLines)
 end
 
 function Menu:getExpectedLineContent(lineInfo)
-    if lineInfo.type == "game_header" then
+    if lineInfo.type == "category_header" then
+        return categoryHeader[lineInfo.index]
+    elseif lineInfo.type == "category" then
+        return self:createMenuItem(lineInfo.value, self.selectedCategory)
+    elseif lineInfo.type == "game_header" then
         return gameHeader[lineInfo.index]
     elseif lineInfo.type == "game" then
-        return self:createMenuItem(lineInfo.value, self.game)
+        return self:createMenuItem(lineInfo.value, self.selectedGame)
     elseif lineInfo.type == "difficulty_header" then
         return difficultyHeader[lineInfo.index]
     elseif lineInfo.type == "difficulty" then
@@ -176,7 +219,9 @@ function Menu:onChange()
     end
 
     local currentLines = self.window.buffer:getGameLines()
-    log.info("Menu:onChange - Wykryto zmianę w menu", "lines_count:", #currentLines)
+    log.info("Menu:onChange - Wykryto zmianę w menu",
+        "state:", self.currentState,
+        "lines_count:", #currentLines)
 
     if not self.lineTypeMap or #self.lineTypeMap == 0 then
         self:buildLineTypeMap()
@@ -184,22 +229,32 @@ function Menu:onChange()
 
     local hasChanges, changeType, selectedValue = self:detectChanges(currentLines)
 
-    if changeType == "game_selected" then
-        log.info("Menu:onChange - Uruchamianie gry", "game:", selectedValue, "difficulty:", self.difficulty)
-        self.game = selectedValue
+    if changeType == "category_selected" then
+        log.info("Menu:onChange - Wybrano kategorię", "category:", selectedValue)
+        self.selectedCategory = selectedValue
+        self.currentState = MenuState.GAME_SELECTION
+        self:safeRerender("category_change")
+        return
+    elseif changeType == "game_selected" then
+        log.info("Menu:onChange - Wybrano grę", "game:", selectedValue)
+        self.selectedGame = selectedValue
+        self.currentState = MenuState.DIFFICULTY_SELECTION
+        self:safeRerender("game_change")
+        return
+    elseif changeType == "difficulty_selected" then
+        log.info("Menu:onChange - Uruchamianie gry",
+            "game:", self.selectedGame,
+            "difficulty:", selectedValue)
+        self.difficulty = selectedValue
 
-        local ok, msg = pcall(self.onResults, self.game, self.difficulty)
+        local ok, msg = pcall(self.onResults, self.selectedGame, self.difficulty)
         if not ok then
             log.error("Menu:onChange - Błąd podczas uruchamiania gry", "error:", msg)
         end
         return
-    elseif changeType == "difficulty_selected" then
-        log.info("Menu:onChange - Zmiana poziomu trudności", "new_difficulty:", selectedValue)
-        self.difficulty = selectedValue
-        self:safeRerender("difficulty_change")
-        return
     elseif hasChanges then
-        log.warn("Menu:onChange - Wykryto niepożądane zmiany, wykonuję re-render", "change_type:", changeType)
+        log.warn("Menu:onChange - Wykryto niepożądane zmiany, wykonuję re-render",
+            "change_type:", changeType)
         self:safeRerender("restore_menu")
         return
     end
@@ -208,7 +263,9 @@ function Menu:onChange()
 end
 
 function Menu:safeRerender(reason)
-    log.info("Menu:safeRerender - Rozpoczynanie bezpiecznego re-renderowania", "reason:", reason)
+    log.info("Menu:safeRerender - Rozpoczynanie bezpiecznego re-renderowania",
+        "reason:", reason,
+        "state:", self.currentState)
 
     if self.isRerendering then
         log.warn("Menu:safeRerender - Re-renderowanie już w toku, pomijanie")
@@ -239,26 +296,41 @@ function Menu:createMenuItem(str, currentValue)
 end
 
 function Menu:render()
-    log.info("Menu:render - Rozpoczynanie renderowania menu")
+    log.info("Menu:render - Rozpoczynanie renderowania menu",
+        "state:", self.currentState,
+        "selected_category:", self.selectedCategory,
+        "selected_game:", self.selectedGame,
+        "difficulty:", self.difficulty)
 
     self.window.buffer:clearGameLines()
 
     local lines = {}
 
-    for idx = 1, #gameHeader do
-        table.insert(lines, gameHeader[idx])
-    end
+    if self.currentState == MenuState.CATEGORY_SELECTION then
+        for idx = 1, #categoryHeader do
+            table.insert(lines, categoryHeader[idx])
+        end
 
-    for idx = 1, #types.games do
-        table.insert(lines, self:createMenuItem(types.games[idx], self.game))
-    end
+        for idx = 1, #types.categories do
+            table.insert(lines, self:createMenuItem(types.categories[idx], self.selectedCategory))
+        end
+    elseif self.currentState == MenuState.GAME_SELECTION then
+        for idx = 1, #gameHeader do
+            table.insert(lines, gameHeader[idx])
+        end
 
-    for idx = 1, #difficultyHeader do
-        table.insert(lines, difficultyHeader[idx])
-    end
+        local gamesInCategory = types.gamesByCategory[self.selectedCategory] or {}
+        for idx = 1, #gamesInCategory do
+            table.insert(lines, self:createMenuItem(gamesInCategory[idx], self.selectedGame))
+        end
+    elseif self.currentState == MenuState.DIFFICULTY_SELECTION then
+        for idx = 1, #difficultyHeader do
+            table.insert(lines, difficultyHeader[idx])
+        end
 
-    for idx = 1, #types.difficulty do
-        table.insert(lines, self:createMenuItem(types.difficulty[idx], self.difficulty))
+        for idx = 1, #types.difficulty do
+            table.insert(lines, self:createMenuItem(types.difficulty[idx], self.difficulty))
+        end
     end
 
     for idx = 1, #credits do
@@ -273,8 +345,7 @@ function Menu:render()
 
     log.info("Menu:render - Renderowanie zakończone",
         "total_lines:", #lines,
-        "selected_game:", self.game,
-        "selected_difficulty:", self.difficulty)
+        "state:", self.currentState)
 end
 
 function Menu:close()
@@ -286,6 +357,9 @@ function Menu:close()
     self.lineTypeMap = {}
     self.lastRenderedLines = {}
     self.isRerendering = false
+    self.currentState = MenuState.CATEGORY_SELECTION
+    self.selectedCategory = nil
+    self.selectedGame = nil
 end
 
 return Menu

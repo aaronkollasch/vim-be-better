@@ -7,6 +7,75 @@ local difficulty = {
     "tpope",
 }
 
+local categories = {
+    "🎯 Navigation",
+    "✂️ Text Objects",
+    "🔄 Substitution",
+    "📝 Formatting",
+    "🔍 Search & Replace",
+    "🎨 Visual & Selection",
+    "🔢 Numbers & Operations",
+    "🏗️ Advanced Features",
+    "🎪 Mixed Challenges",
+    "📚 Classic Games"
+}
+
+local gamesByCategory = {
+    ["🎯 Navigation"] = {
+        "find-char",
+        "word-boundaries",
+        "bracket-jump"
+    },
+    ["✂️ Text Objects"] = {
+        "text-objects-basic",
+        "text-objects-advanced",
+        "block-edit"
+    },
+    ["🔄 Substitution"] = {
+        "substitute-basic",
+        "regex-master",
+        "global-replace"
+    },
+    ["📝 Formatting"] = {
+        "indent-master",
+        "case-converter",
+        "join-lines"
+    },
+    ["🔍 Search & Replace"] = {
+        "search-replace",
+        "pattern-hunter"
+    },
+    ["🎨 Visual & Selection"] = {
+        "visual-precision",
+        "visual-block"
+    },
+    ["🔢 Numbers & Operations"] = {
+        "increment-game",
+        "number-sequence"
+    },
+    ["🏗️ Advanced Features"] = {
+        "macro-recorder",
+        "dot-repeat",
+        "fold-master",
+        "comment-toggle"
+    },
+    ["🎪 Mixed Challenges"] = {
+        "vim-golf",
+        "speed-editing",
+        "refactor-race"
+    },
+    ["📚 Classic Games"] = {
+        "words",
+        "ci{",
+        "relative",
+        "hjkl",
+        "whackamole",
+        "snake",
+        "random"
+    }
+}
+
+-- compatibility
 local games = {
     "words",
     "ci{",
@@ -19,6 +88,7 @@ local games = {
 
 return {
     difficulty = difficulty,
-    games = games
+    games = games,
+    categories = categories,
+    gamesByCategory = gamesByCategory
 }
-

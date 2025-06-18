@@ -1,5 +1,3 @@
-local bind = require("vim-be-better.bind");
-local types = require("vim-be-better.types");
 local GameUtils = require("vim-be-better.game-utils");
 local RelativeRound = require("vim-be-better.games.relative");
 local WordRound = require("vim-be-better.games.words");
@@ -7,6 +5,7 @@ local CiRound = require("vim-be-better.games.ci");
 local HjklRound = require("vim-be-better.games.hjkl");
 local WhackAMoleRound = require("vim-be-better.games.whackamole");
 local Snake = require("vim-be-better.games.snake");
+local PlaceholderGame = require("vim-be-better.games.placeholder");
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
 
@@ -23,7 +22,7 @@ local states = {
     gameEnd = 2,
 }
 
-local games = {
+local classicGames = {
     ["ci{"] = function(difficulty, window)
         return CiRound:new(difficulty, window)
     end,
@@ -49,18 +48,120 @@ local games = {
     end,
 }
 
+local newGames = {
+    -- Navigation
+    ["find-char"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Find Character")
+    end,
+    ["word-boundaries"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Word Boundaries")
+    end,
+    ["bracket-jump"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Bracket Jump")
+    end,
+
+    -- Text Objects
+    ["text-objects-basic"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Text Objects Basic")
+    end,
+    ["text-objects-advanced"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Text Objects Advanced")
+    end,
+    ["block-edit"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Block Edit")
+    end,
+
+    -- Substitution
+    ["substitute-basic"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Substitute Basic")
+    end,
+    ["regex-master"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Regex Master")
+    end,
+    ["global-replace"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Global Replace")
+    end,
+
+    -- Formatting
+    ["indent-master"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Indent Master")
+    end,
+    ["case-converter"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Case Converter")
+    end,
+    ["join-lines"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Join Lines")
+    end,
+
+    -- Search & Replace
+    ["search-replace"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Search & Replace")
+    end,
+    ["pattern-hunter"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Pattern Hunter")
+    end,
+
+    -- Visual & Selection
+    ["visual-precision"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Visual Precision")
+    end,
+    ["visual-block"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Visual Block")
+    end,
+
+    -- Numbers & Operations
+    ["increment-game"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Increment Game")
+    end,
+    ["number-sequence"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Number Sequence")
+    end,
+
+    -- Advanced Features
+    ["macro-recorder"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Macro Recorder")
+    end,
+    ["dot-repeat"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Dot Repeat")
+    end,
+    ["fold-master"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Fold Master")
+    end,
+    ["comment-toggle"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Comment Toggle")
+    end,
+
+    -- Mixed Challenges
+    ["vim-golf"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Vim Golf")
+    end,
+    ["speed-editing"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Speed Editing")
+    end,
+    ["refactor-race"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Refactor Race")
+    end,
+}
+
+local games = vim.tbl_extend("force", classicGames, newGames)
+
 local runningId = 0
 
 local GameRunner = {}
 
 local function getGame(game, difficulty, window)
     log.info("getGame", game, difficulty, window)
+
+    if not games[game] then
+        log.warn("Game not found, using placeholder:", game)
+        return PlaceholderGame:new(difficulty, window, game)
+    end
+
     return games[game](difficulty, window)
 end
 
--- games table, difficulty string
 function GameRunner:new(selectedGames, difficulty, window, onFinished)
-    log.info("New", difficulty)
+    log.info("GameRunner:new", difficulty)
     local config = {
         difficulty = difficulty,
         roundCount = GameUtils.getRoundCount(difficulty),
@@ -71,8 +172,8 @@ function GameRunner:new(selectedGames, difficulty, window, onFinished)
 
     if selectedGames[1] == "random" then
         selectedGames = {}
-        for idx = 1, #types.games - 1 do
-            table.insert(selectedGames, types.games[idx])
+        for name, _ in pairs(classicGames) do
+            table.insert(selectedGames, name)
         end
         log.info("GameRunner:new - random selected", vim.inspect(selectedGames))
     end
@@ -101,8 +202,8 @@ function GameRunner:new(selectedGames, difficulty, window, onFinished)
 
     local function onChange()
         if hasEverythingEnded then
-            if not self.ended then
-                self:close()
+            if not game.ended then
+                game:close()
             end
             return
         end
@@ -123,7 +224,7 @@ end
 
 function GameRunner:countdown(count, cb)
     local self = self
-    ok, msg = pcall(function()
+    local ok, msg = pcall(function()
         if count > 0 then
             local str = string.format("Game Starts in %d", count)
 
@@ -157,7 +258,7 @@ function GameRunner:checkForNext()
     log.info("GameRunner:checkForNext")
 
     local lines = self.window.buffer:getGameLines()
-    local expectedLines, optionLine = self:renderEndGame()
+    local expectedLines = self:renderEndGame()
     local idx = 0
     local found = false
 
@@ -188,7 +289,7 @@ function GameRunner:checkForNext()
 
     -- todo implement this correctly....
     if foundKey then
-       self.onFinished(self, foundKey)
+        self.onFinished(self, foundKey)
     else
         log.info("GameRunner:checkForNext Some line was changed that is insignificant, rerendering")
         self.window.buffer:render(expectedLines)
@@ -230,14 +331,14 @@ function GameRunner:endRound(success)
     local result = {
         timestamp = vim.fn.localtime(),
         roundNum = self.currentRound,
-        difficulty = self.round.difficulty,
+        difficulty = self.config.difficulty,
         roundName = self.round:name(),
         success = success,
         time = totalTime,
     }
     Stats:logResult(result)
     log.info("endRound", self.currentRound, self.config.roundCount)
-    if self.currentRound >= self.config.roundCount then -- TODO: self.config.roundCount then
+    if self.currentRound >= self.config.roundCount then
         self:endGame()
         return
     end
@@ -308,20 +409,20 @@ function GameRunner:run()
     if roundConfig.canEndRound then
         self.round:setEndRoundCallback(function() self:endRound() end)
     end
-    self.window.buffer:setInstructions(self.round.getInstructions())
+    self.window.buffer:setInstructions(self.round:getInstructions())
     local lines, cursorLine, cursorCol = self.round:render()
     self.window.buffer:render(lines)
 
     cursorLine = cursorLine or 0
     cursorCol = cursorCol or 0
 
-    local instuctionLen = #self.round.getInstructions()
+    local instructionLen = #self.round:getInstructions()
     local curRoundLineLen = 1
-    cursorLine = cursorLine + curRoundLineLen + instuctionLen
+    cursorLine = cursorLine + curRoundLineLen + instructionLen
 
     log.info("Setting current line to", cursorLine, cursorCol)
     if cursorLine > 0 and not roundConfig.noCursor then
-         vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
+        vim.api.nvim_win_set_cursor(0, { cursorLine, cursorCol })
     end
 
     self.startTime = GameUtils.getTime()
@@ -342,8 +443,6 @@ function GameRunner:run()
 
         self:endRound()
     end, roundConfig.roundTime)
-
 end
 
 return GameRunner
-
