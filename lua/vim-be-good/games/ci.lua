@@ -1,4 +1,4 @@
-local GameUtils = require("vim-be-better.game-utils")
+local GameUtils = require("vim-be-good.game-utils")
 local log = require("vim-be-good.log")
 local gameLineCount = 20
 

@@ -1,7 +1,7 @@
 local V = vim.api
-local C = require('vim-be-better.games.snakelib.const')
-local Grid = require('vim-be-better.games.snakelib.grid')
-local Snake = require('vim-be-better.games.snakelib.snake')
+local C = require('vim-be-good.games.snakelib.const')
+local Grid = require('vim-be-good.games.snakelib.grid')
+local Snake = require('vim-be-good.games.snakelib.snake')
 
 local SnakeGame = {}
 

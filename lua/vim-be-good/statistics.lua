@@ -1,8 +1,8 @@
-local log = require("vim-be-better.log")
+local log = require("vim-be-good.log")
 local default_config =  {
-    plugin = 'VimBeBetterStats',
+    plugin = 'VimBeGoodStats',
 
-    save_statistics = vim.g["vim_be_better_save_statistics"] or false,
+    save_statistics = vim.g["vim_be_good_save_statistics"] or false,
 
 }
 

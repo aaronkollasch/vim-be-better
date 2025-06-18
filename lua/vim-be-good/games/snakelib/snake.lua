@@ -1,6 +1,6 @@
 local Snake = {}
 
-local C = require('vim-be-better.games.snakelib.const')
+local C = require('vim-be-good.games.snakelib.const')
 local Dir = C.Directions
 
 local STOPPED = Dir.STOPPED

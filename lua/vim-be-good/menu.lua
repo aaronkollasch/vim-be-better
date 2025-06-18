@@ -1,6 +1,13 @@
+<<<<<<< HEAD:lua/vim-be-better/menu.lua
 local log = require("vim-be-better.log")
 local bind = require("vim-be-better.bind")
 local types = require("vim-be-better.types")
+=======
+local log = require("vim-be-good.log")
+local bind = require("vim-be-good.bind")
+local types = require("vim-be-good.types")
+local createEmpty = require("vim-be-good.game-utils").createEmpty
+>>>>>>> parent of 294a694 (renamed plugin to `vim-be-better`):lua/vim-be-good/menu.lua
 
 local Menu = {}
 
@@ -32,6 +39,7 @@ local difficultyHeader = {
 }
 
 local instructions = {
+<<<<<<< HEAD:lua/vim-be-better/menu.lua
     "VimBeBetter is a collection of categorized mini-games for neovim",
     "designed to systematically improve your vim proficiency.",
     "",
@@ -47,6 +55,13 @@ local instructions = {
     "📚 Classics (legacy) - Original vim-be-good games",
     "",
     "Navigation: Use hjkl, delete line (dd) to select"
+=======
+    "VimBeGood is a collection of small games for neovim which are",
+    "intended to help you improve your vim proficiency.",
+    "delete a line to select the line.  If you delete a difficulty,",
+    "it will select that difficulty, but if you delete a game it ",
+    "will start the game."
+>>>>>>> parent of 294a694 (renamed plugin to `vim-be-better`):lua/vim-be-good/menu.lua
 }
 
 local credits = {
@@ -55,7 +70,12 @@ local credits = {
     "Extended by Szymon Wilczek",
     "Based on vim-be-good by ThePrimeagen",
     "",
+<<<<<<< HEAD:lua/vim-be-better/menu.lua
     "https://github.com/your-username/vim-be-better",
+=======
+    "https://github.com/ThePrimeagen/vim-be-good",
+    "https://twitch.tv/ThePrimeagen",
+>>>>>>> parent of 294a694 (renamed plugin to `vim-be-better`):lua/vim-be-good/menu.lua
 }
 
 function Menu:new(window, onResults)
