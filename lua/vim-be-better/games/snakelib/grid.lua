@@ -1,6 +1,6 @@
 local V = vim.api
-local C = require('vim-be-good.games.snakelib.const')
-local log = require("vim-be-good.log")
+local C = require('vim-be-better.games.snakelib.const')
+local log = require("vim-be-better.log")
 
 local Grid = {}
 

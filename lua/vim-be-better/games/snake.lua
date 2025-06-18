@@ -1,7 +1,7 @@
-local log = require("vim-be-good.log")
-local GameUtils = require("vim-be-good.game-utils")
-local SnakeGame = require("vim-be-good.games.snakelib.snakegame")
-local T = require("vim-be-good.types")
+local log = require("vim-be-better.log")
+local GameUtils = require("vim-be-better.game-utils")
+local SnakeGame = require("vim-be-better.games.snakelib.snakegame")
+local T = require("vim-be-better.types")
 
 local Snake = {}
 

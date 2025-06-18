@@ -1,5 +1,5 @@
-local GameUtils = require("vim-be-good.game-utils")
-local log = require("vim-be-good.log")
+local GameUtils = require("vim-be-better.game-utils")
+local log = require("vim-be-better.log")
 
 local randomOffset = {
     noob = 10,
@@ -21,8 +21,8 @@ function RelativeRound:new(difficulty, window)
     local round = {
         window = window,
         difficulty = difficulty,
-        fixedOffset = vim.g["vim_be_good_delete_me_fixed_offset"],
-        randomOffset = vim.g["vim_be_good_delete_me_random_offset"] or randomOffset[difficulty],
+        fixedOffset = vim.g["vim_be_better_delete_me_fixed_offset"],
+        randomOffset = vim.g["vim_be_better_delete_me_random_offset"] or randomOffset[difficulty],
     }
 
     self.__index = self
