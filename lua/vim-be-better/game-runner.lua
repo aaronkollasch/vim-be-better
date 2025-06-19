@@ -22,6 +22,8 @@ local IndentMasterRound = require("vim-be-better.games.formatting.indent-master"
 local CaseConverterRound = require("vim-be-better.games.formatting.case-converter")
 local JoinLinesRound = require("vim-be-better.games.formatting.join-lines")
 
+local IncrementGameRound = require("vim-be-better.games.numbers.increment-game")
+
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
 
@@ -124,7 +126,10 @@ local newGames = {
 
     -- Numbers & Operations
     ["increment-game"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Increment Game")
+        return IncrementGameRound:new(difficulty, window)
+    end,
+    ["number-manipulation"] = function(difficulty, window)
+        return PlaceholderGame:new(difficulty, window, "Number Manipulation")
     end,
     ["number-sequence"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Number Sequence")
