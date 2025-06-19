@@ -7,7 +7,6 @@ local WhackAMoleRound = require("vim-be-better.games.whackamole");
 local Snake = require("vim-be-better.games.snake");
 local PlaceholderGame = require("vim-be-better.games.placeholder");
 
-package.loaded["vim-be-better.games.navigation.find-char"] = nil
 local FindCharRound = require("vim-be-better.games.navigation.find-char");
 local WordBoundariesRound = require("vim-be-better.games.navigation.word-boundaries")
 local BracketJumpRound = require("vim-be-better.games.navigation.bracket-jump")
