@@ -25,6 +25,8 @@ local JoinLinesRound = require("vim-be-better.games.formatting.join-lines")
 local IncrementGameRound = require("vim-be-better.games.numbers.increment-game")
 local NumberSequenceRound = require("vim-be-better.games.numbers.number-sequence")
 
+local MacroRecorderRound = require("vim-be-better.games.advanced.macro-recorder")
+
 
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
@@ -134,7 +136,7 @@ local newGames = {
 
     -- Advanced Features
     ["macro-recorder"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Macro Recorder")
+        return MacroRecorderRound:new(difficulty, window)
     end,
     ["dot-repeat"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Dot Repeat")
