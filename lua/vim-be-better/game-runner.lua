@@ -18,6 +18,8 @@ local BlockEditRound = require("vim-be-better.games.text-objects.block-edit")
 local SubstituteBasicRound = require("vim-be-better.games.substitution.substitute-basic")
 local RegexMasterRound = require("vim-be-better.games.substitution.regex-master")
 
+local IndentMasterRound = require("vim-be-better.games.formatting.indent-master")
+
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
 
@@ -93,7 +95,7 @@ local newGames = {
 
     -- Formatting
     ["indent-master"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Indent Master")
+        return IndentMasterRound:new(difficulty, window)
     end,
     ["case-converter"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Case Converter")
