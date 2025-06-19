@@ -343,12 +343,12 @@ function DotRepeatRound:getConfig()
     self:generateChallenge()
 
     local timeConfig = {
-        noob = 45000,      
-        easy = 35000,      
-        medium = 40000,    
-        hard = 50000,      
-        nightmare = 60000, 
-        tpope = 45000      
+        noob = 45000,
+        easy = 35000,
+        medium = 40000,
+        hard = 50000,
+        nightmare = 60000,
+        tpope = 45000
     }
 
     return {
@@ -372,10 +372,10 @@ function DotRepeatRound:checkForWin()
 
     local allLines = vim.api.nvim_buf_get_lines(self.window.bufh, 0, -1, false)
 
-    local codeStartLine = 12 
+    local codeStartLine = 12
     for i, line in ipairs(allLines) do
         if line:match("^Goal:") then
-            codeStartLine = i + 1 
+            codeStartLine = i + 1
             break
         end
     end
