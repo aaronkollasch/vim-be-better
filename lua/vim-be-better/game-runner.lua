@@ -10,6 +10,7 @@ local PlaceholderGame = require("vim-be-better.games.placeholder");
 local FindCharRound = require("vim-be-better.games.navigation.find-char");
 local WordBoundariesRound = require("vim-be-better.games.navigation.word-boundaries")
 local BracketJumpRound = require("vim-be-better.games.navigation.bracket-jump")
+local VisualPrecisionRound = require("vim-be-better.games.navigation.visual-precision")
 
 local TextObjectsBasicRound = require("vim-be-better.games.text-objects.text-objects-basic")
 local BlockEditRound = require("vim-be-better.games.text-objects.block-edit")
@@ -24,7 +25,6 @@ local JoinLinesRound = require("vim-be-better.games.formatting.join-lines")
 local IncrementGameRound = require("vim-be-better.games.numbers.increment-game")
 local NumberSequenceRound = require("vim-be-better.games.numbers.number-sequence")
 
-local VisualPrecisionRound = require("vim-be-better.games.visual.visual-precision")
 
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
@@ -79,6 +79,9 @@ local newGames = {
     ["bracket-jump"] = function(difficulty, window)
         return BracketJumpRound:new(difficulty, window)
     end,
+    ["visual-precision"] = function(difficulty, window)
+        return VisualPrecisionRound:new(difficulty, window)
+    end,
 
     -- Text Objects
     ["text-objects-basic"] = function(difficulty, window)
@@ -116,14 +119,6 @@ local newGames = {
     end,
     ["pattern-hunter"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Pattern Hunter")
-    end,
-
-    -- Visual & Selection
-    ["visual-precision"] = function(difficulty, window)
-        return VisualPrecisionRound:new(difficulty, window)
-    end,
-    ["visual-block"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Visual Block")
     end,
 
     -- Numbers & Operations

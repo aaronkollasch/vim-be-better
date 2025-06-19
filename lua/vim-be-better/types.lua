@@ -13,7 +13,6 @@ local categories = {
     "🔄 Substitution",
     "📝 Formatting",
     "🔍 Search & Replace",
-    "🎨 Visual & Selection",
     "🔢 Numbers & Operations",
     "🏗️ Advanced Features",
     "🎪 Mixed Challenges",
@@ -24,7 +23,8 @@ local gamesByCategory = {
     ["🎯 Navigation"] = {
         "find-char",
         "word-boundaries",
-        "bracket-jump"
+        "bracket-jump",
+        "visual-precision",
     },
     ["✂️ Text Objects"] = {
         "text-objects-basic",
@@ -43,10 +43,6 @@ local gamesByCategory = {
     ["🔍 Search & Replace"] = {
         "search-replace",
         "pattern-hunter"
-    },
-    ["🎨 Visual & Selection"] = {
-        "visual-precision",
-        "visual-block"
     },
     ["🔢 Numbers & Operations"] = {
         "increment-game",
