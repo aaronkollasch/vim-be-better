@@ -11,6 +11,9 @@ package.loaded["vim-be-better.games.navigation.find-char"] = nil
 local FindCharRound = require("vim-be-better.games.navigation.find-char");
 local WordBoundariesRound = require("vim-be-better.games.navigation.word-boundaries")
 local BracketJumpRound = require("vim-be-better.games.navigation.bracket-jump")
+
+local TextObjectsBasicRound = require("vim-be-better.games.text-objects.text-objects-basic")
+
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
 
@@ -67,7 +70,7 @@ local newGames = {
 
     -- Text Objects
     ["text-objects-basic"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Text Objects Basic")
+        return TextObjectsBasicRound:new(difficulty, window)
     end,
     ["text-objects-advanced"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Text Objects Advanced")
