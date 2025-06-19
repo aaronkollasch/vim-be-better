@@ -28,7 +28,6 @@ local gamesByCategory = {
     },
     ["✂️ Text Objects"] = {
         "text-objects-basic",
-        "text-objects-advanced",
         "block-edit"
     },
     ["🔄 Substitution"] = {
