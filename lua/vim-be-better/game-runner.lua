@@ -16,6 +16,7 @@ local TextObjectsBasicRound = require("vim-be-better.games.text-objects.text-obj
 local BlockEditRound = require("vim-be-better.games.text-objects.block-edit")
 
 local SubstituteBasicRound = require("vim-be-better.games.substitution.substitute-basic")
+local RegexMasterRound = require("vim-be-better.games.substitution.regex-master")
 
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
@@ -84,7 +85,7 @@ local newGames = {
         return SubstituteBasicRound:new(difficulty, window)
     end,
     ["regex-master"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Regex Master")
+        return RegexMasterRound:new(difficulty, window)
     end,
     ["global-replace"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Global Replace")
