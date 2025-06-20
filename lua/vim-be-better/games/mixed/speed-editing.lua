@@ -15,7 +15,6 @@ local instructions = {
     "Goal: Complete the transformation as quickly as possible.",
 }
 
--- Time targets based on difficulty (in seconds)
 local timeTargets = {
     noob = { base = 8, multiplier = 1.0 },      -- 8s base, easier targets
     easy = { base = 6, multiplier = 1.2 },      -- 7.2s base
@@ -336,7 +335,7 @@ function SpeedEditingRound:getConfig()
     self.timerRunning = false
 
     return {
-        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000, -- Fallback timeout
+        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000, 
         canEndRound = true,
     }
 end
@@ -348,7 +347,6 @@ function SpeedEditingRound:generateChallenge()
 
     self.currentChallenge = vim.deepcopy(config.challenges[math.random(#config.challenges)])
 
-    -- Calculate target time
     local baseTime = timeConfig.base
     local multiplier = timeConfig.multiplier * (self.currentChallenge.timeMultiplier or 1.0)
     self.targetTime = baseTime * multiplier
@@ -393,7 +391,6 @@ function SpeedEditingRound:setupChangeMonitoring()
 
     vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
-    -- Start timer on first edit
     vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
         group = augroup_name,
         buffer = self.window.buffer.bufh,
@@ -413,15 +410,13 @@ function SpeedEditingRound:checkForWin()
         return false
     end
 
-    -- Use same logic as working games (like global-replace)
     local all_lines = vim.api.nvim_buf_get_lines(self.window.buffer.bufh, 0, -1, false)
     local actual_text = {}
 
-    -- Find the start of the actual code content (after hint line)
     local start_line = nil
     for i, line in ipairs(all_lines) do
         if line:match("^Hint:") then
-            start_line = i + 2  -- Skip hint line and empty line
+            start_line = i + 2  
             break
         end
     end
@@ -437,7 +432,6 @@ function SpeedEditingRound:checkForWin()
         "Expected:", vim.inspect(self.currentChallenge.expectedResult),
         "Actual:", vim.inspect(actual_text))
 
-    -- Check if actual matches expected
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -479,7 +473,6 @@ function SpeedEditingRound:render()
 
     local lines = {}
 
-    -- Add challenge info
     table.insert(lines, "Challenge: " .. self.currentChallenge.name)
     table.insert(lines, "Description: " .. self.currentChallenge.description)
     table.insert(lines, "Target: < " .. string.format("%.1f", self.targetTime) .. " seconds")
@@ -501,16 +494,13 @@ function SpeedEditingRound:render()
 
     table.insert(lines, "")
 
-    -- Add starting text
     for _, line in ipairs(self.currentChallenge.startText) do
         table.insert(lines, line)
     end
 
-    -- Calculate cursor position
     local cursorLine = #lines - #self.currentChallenge.startText + (self.currentChallenge.cursorPos.line or 1)
     local cursorCol = (self.currentChallenge.cursorPos.col or 1) - 1
 
-    -- Setup monitoring after render
     vim.defer_fn(function()
         self:setupChangeMonitoring()
     end, 100)
