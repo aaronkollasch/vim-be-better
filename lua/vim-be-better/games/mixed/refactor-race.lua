@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Refactor Race ---",
@@ -437,8 +436,6 @@ local difficultyConfig = {
 local RefactorRaceRound = {}
 
 function RefactorRaceRound:new(difficulty, window)
-    log.info("RefactorRaceRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -460,8 +457,6 @@ function RefactorRaceRound:getInstructions()
 end
 
 function RefactorRaceRound:getConfig()
-    log.info("RefactorRaceRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -488,17 +483,12 @@ function RefactorRaceRound:generateChallenge()
     local baseTime = timeConfig.base
     local multiplier = timeConfig.multiplier * (self.currentChallenge.timeMultiplier or 1.0)
     self.targetTime = baseTime * multiplier
-
-    log.info("RefactorRaceRound:generateChallenge",
-        self.currentChallenge.name,
-        "target time:", self.targetTime)
 end
 
 function RefactorRaceRound:startTimer()
     if not self.timerRunning then
         self.startTime = vim.fn.reltimefloat(vim.fn.reltime())
         self.timerRunning = true
-        log.info("RefactorRaceRound:startTimer - Timer started")
     end
 end
 
@@ -539,8 +529,6 @@ function RefactorRaceRound:setupChangeMonitoring()
             end
         end
     })
-
-    log.info("RefactorRaceRound:setupChangeMonitoring - Created augroup:", augroup_name)
 end
 
 function RefactorRaceRound:checkForWin()
@@ -565,11 +553,6 @@ function RefactorRaceRound:checkForWin()
         end
     end
 
-    log.info("RefactorRaceRound:checkForWin",
-        "start_line:", start_line,
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -585,12 +568,6 @@ function RefactorRaceRound:checkForWin()
     if matches then
         self.hasWon = true
         self.endTime = self:getCurrentTime()
-        local status = self:getTimeStatus(self.endTime)
-
-        log.info("RefactorRaceRound:checkForWin - REFACTORING MASTER!",
-            "time:", string.format("%.2f", self.endTime),
-            "target:", self.targetTime,
-            "status:", status)
 
         if self.endRoundCallback then
             vim.defer_fn(function()
@@ -605,7 +582,6 @@ end
 
 function RefactorRaceRound:render()
     if not self.currentChallenge then
-        log.error("RefactorRaceRound:render - No current challenge")
         return {}, 1, 0
     end
 
@@ -651,12 +627,6 @@ function RefactorRaceRound:render()
     vim.defer_fn(function()
         self:setupChangeMonitoring()
     end, 100)
-
-    log.info("RefactorRaceRound:render",
-        "challenge:", self.currentChallenge.name,
-        "target:", self.targetTime,
-        "cursor:", cursorLine, cursorCol,
-        "editable_start:", editableSectionStart)
 
     return lines, cursorLine, cursorCol
 end

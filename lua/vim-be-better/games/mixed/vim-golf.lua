@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Vim Golf ---",
@@ -42,7 +41,7 @@ local difficultyConfig = {
                 expectedResult = {
                     "hello world"
                 },
-                cursorPos = { line = 1, col = 7 }, 
+                cursorPos = { line = 1, col = 7 },
                 par = 2,
                 optimal = 2,
                 description = "Delete the word 'beautiful'",
@@ -57,7 +56,7 @@ local difficultyConfig = {
                 expectedResult = {
                     "vim is awesome"
                 },
-                cursorPos = { line = 1, col = 5 }, 
+                cursorPos = { line = 1, col = 5 },
                 par = 2,
                 optimal = 2,
                 description = "Replace 'x' with 'i'",
@@ -109,7 +108,7 @@ local difficultyConfig = {
                 expectedResult = {
                     "function new() {"
                 },
-                cursorPos = { line = 1, col = 10 }, 
+                cursorPos = { line = 1, col = 10 },
                 par = 5,
                 optimal = 5,
                 description = "Change 'old' to 'new'",
@@ -124,7 +123,7 @@ local difficultyConfig = {
                 expectedResult = {
                     "name: 'John'"
                 },
-                cursorPos = { line = 1, col = 7 }, 
+                cursorPos = { line = 1, col = 7 },
                 par = 4,
                 optimal = 4,
                 description = "Add quotes around 'John'",
@@ -169,7 +168,7 @@ local difficultyConfig = {
                 expectedResult = {
                     "print(new_value)"
                 },
-                cursorPos = { line = 1, col = 7 }, 
+                cursorPos = { line = 1, col = 7 },
                 par = 11,
                 optimal = 11,
                 description = "Change content inside parentheses",
@@ -206,7 +205,7 @@ local difficultyConfig = {
                 expectedResult = {
                     "function test(c, a, b) {"
                 },
-                cursorPos = { line = 1, col = 14 }, 
+                cursorPos = { line = 1, col = 14 },
                 par = 15,
                 optimal = 12,
                 description = "Rearrange parameters: move 'c' to front"
@@ -311,8 +310,6 @@ local difficultyConfig = {
 local VimGolfRound = {}
 
 function VimGolfRound:new(difficulty, window)
-    log.info("VimGolfRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -332,8 +329,6 @@ function VimGolfRound:getInstructions()
 end
 
 function VimGolfRound:getConfig()
-    log.info("VimGolfRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -345,7 +340,7 @@ function VimGolfRound:getConfig()
     self.keystrokeCount = 0
 
     return {
-        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000, 
+        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000,
         canEndRound = true,
     }
 end
@@ -355,10 +350,6 @@ function VimGolfRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = vim.deepcopy(config.challenges[math.random(#config.challenges)])
-
-    log.info("VimGolfRound:generateChallenge",
-        self.currentChallenge.name,
-        "par:", self.currentChallenge.par)
 end
 
 function VimGolfRound:getScoreStatus(keystrokes)
@@ -402,13 +393,10 @@ function VimGolfRound:setupKeystrokeMonitoring()
         callback = function()
         end
     })
-
-    log.info("VimGolfRound:setupKeystrokeMonitoring - Created augroup:", augroup_name)
 end
 
 function VimGolfRound:incrementKeystroke()
     self.keystrokeCount = self.keystrokeCount + 1
-    log.info("VimGolfRound:incrementKeystroke - Count:", self.keystrokeCount)
 end
 
 function VimGolfRound:checkForWin()
@@ -446,12 +434,6 @@ function VimGolfRound:checkForWin()
     end
     self.lastBuffer = vim.deepcopy(actual_text)
 
-    log.info("VimGolfRound:checkForWin",
-        "start_line:", start_line,
-        "keystrokes:", self.keystrokeCount,
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -466,12 +448,6 @@ function VimGolfRound:checkForWin()
 
     if matches then
         self.hasWon = true
-        local status = self:getScoreStatus(self.keystrokeCount)
-
-        log.info("VimGolfRound:checkForWin - GOLF CHAMPION!",
-            "keystrokes:", self.keystrokeCount,
-            "par:", self.currentChallenge.par,
-            "status:", status)
 
         if self.endRoundCallback then
             vim.defer_fn(function()
@@ -486,7 +462,6 @@ end
 
 function VimGolfRound:render()
     if not self.currentChallenge then
-        log.error("VimGolfRound:render - No current challenge")
         return {}, 1, 0
     end
 
@@ -504,7 +479,9 @@ function VimGolfRound:render()
     end
 
     if (self.difficulty == "noob" or self.difficulty == "easy") and self.currentChallenge.optimalSolution then
-        table.insert(lines, "Optimal Solution: " .. self.currentChallenge.optimalSolution .. " (" .. self.currentChallenge.optimal .. " keystrokes)")
+        table.insert(lines,
+            "Optimal Solution: " ..
+            self.currentChallenge.optimalSolution .. " (" .. self.currentChallenge.optimal .. " keystrokes)")
     end
 
     if self.difficulty == "noob" or self.difficulty == "easy" then
@@ -513,7 +490,7 @@ function VimGolfRound:render()
 
     table.insert(lines, "")
     table.insert(lines, "=== EXPECTED RESULT ===")
-    
+
     for _, line in ipairs(self.currentChallenge.expectedResult) do
         table.insert(lines, line)
     end
@@ -532,11 +509,6 @@ function VimGolfRound:render()
     vim.defer_fn(function()
         self:setupKeystrokeMonitoring()
     end, 100)
-
-    log.info("VimGolfRound:render",
-        "challenge:", self.currentChallenge.name,
-        "par:", self.currentChallenge.par,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end

@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Speed Editing ---",
@@ -299,8 +298,6 @@ local difficultyConfig = {
 local SpeedEditingRound = {}
 
 function SpeedEditingRound:new(difficulty, window)
-    log.info("SpeedEditingRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -322,8 +319,6 @@ function SpeedEditingRound:getInstructions()
 end
 
 function SpeedEditingRound:getConfig()
-    log.info("SpeedEditingRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -335,7 +330,7 @@ function SpeedEditingRound:getConfig()
     self.timerRunning = false
 
     return {
-        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000, 
+        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000,
         canEndRound = true,
     }
 end
@@ -350,17 +345,12 @@ function SpeedEditingRound:generateChallenge()
     local baseTime = timeConfig.base
     local multiplier = timeConfig.multiplier * (self.currentChallenge.timeMultiplier or 1.0)
     self.targetTime = baseTime * multiplier
-
-    log.info("SpeedEditingRound:generateChallenge",
-        self.currentChallenge.name,
-        "target time:", self.targetTime)
 end
 
 function SpeedEditingRound:startTimer()
     if not self.timerRunning then
         self.startTime = vim.fn.reltimefloat(vim.fn.reltime())
         self.timerRunning = true
-        log.info("SpeedEditingRound:startTimer - Timer started")
     end
 end
 
@@ -401,8 +391,6 @@ function SpeedEditingRound:setupChangeMonitoring()
             end
         end
     })
-
-    log.info("SpeedEditingRound:setupChangeMonitoring - Created augroup:", augroup_name)
 end
 
 function SpeedEditingRound:checkForWin()
@@ -416,7 +404,7 @@ function SpeedEditingRound:checkForWin()
     local start_line = nil
     for i, line in ipairs(all_lines) do
         if line:match("^Hint:") then
-            start_line = i + 2  
+            start_line = i + 2
             break
         end
     end
@@ -426,11 +414,6 @@ function SpeedEditingRound:checkForWin()
             actual_text[i] = all_lines[start_line + i - 1] or ""
         end
     end
-
-    log.info("SpeedEditingRound:checkForWin",
-        "start_line:", start_line,
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
 
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
@@ -447,12 +430,6 @@ function SpeedEditingRound:checkForWin()
     if matches then
         self.hasWon = true
         self.endTime = self:getCurrentTime()
-        local status = self:getTimeStatus(self.endTime)
-
-        log.info("SpeedEditingRound:checkForWin - SPEED DEMON!",
-            "time:", string.format("%.2f", self.endTime),
-            "target:", self.targetTime,
-            "status:", status)
 
         if self.endRoundCallback then
             vim.defer_fn(function()
@@ -467,7 +444,6 @@ end
 
 function SpeedEditingRound:render()
     if not self.currentChallenge then
-        log.error("SpeedEditingRound:render - No current challenge")
         return {}, 1, 0
     end
 
@@ -504,11 +480,6 @@ function SpeedEditingRound:render()
     vim.defer_fn(function()
         self:setupChangeMonitoring()
     end, 100)
-
-    log.info("SpeedEditingRound:render",
-        "challenge:", self.currentChallenge.name,
-        "target:", self.targetTime,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end
