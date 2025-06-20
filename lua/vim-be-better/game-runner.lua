@@ -117,14 +117,6 @@ local newGames = {
         return JoinLinesRound:new(difficulty, window)
     end,
 
-    -- Search & Replace
-    ["search-replace"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Search & Replace")
-    end,
-    ["pattern-hunter"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Pattern Hunter")
-    end,
-
     -- Numbers & Operations
     ["increment-game"] = function(difficulty, window)
         return IncrementGameRound:new(difficulty, window)

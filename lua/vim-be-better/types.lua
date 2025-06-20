@@ -12,7 +12,6 @@ local categories = {
     "✂️ Text Objects",
     "🔄 Substitution",
     "📝 Formatting",
-    "🔍 Search & Replace",
     "🔢 Numbers & Operations",
     "🏗️ Advanced Features",
     "🎪 Mixed Challenges",
@@ -39,10 +38,6 @@ local gamesByCategory = {
         "indent-master",
         "case-converter",
         "join-lines"
-    },
-    ["🔍 Search & Replace"] = {
-        "search-replace",
-        "pattern-hunter"
     },
     ["🔢 Numbers & Operations"] = {
         "increment-game",
