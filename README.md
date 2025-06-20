@@ -355,8 +355,6 @@ A vim-controlled snake game for fun practice.
 ## Commands
 
 - `:VimBeBetter` - Open the main game menu
-- `:VimBeBetter [category]` - Jump to specific category
-- `:VimBeBetter [game] [difficulty]` - Start specific game at difficulty
 
 ## Configuration
 
