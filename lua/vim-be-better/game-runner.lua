@@ -126,9 +126,6 @@ local newGames = {
     ["increment-game"] = function(difficulty, window)
         return IncrementGameRound:new(difficulty, window)
     end,
-    ["number-manipulation"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Number Manipulation")
-    end,
     ["number-sequence"] = function(difficulty, window)
         return NumberSequenceRound:new(difficulty, window)
     end,
@@ -168,7 +165,6 @@ local GameRunner = {}
 local function getGame(game, difficulty, window)
     log.info("getGame", game, difficulty, window)
 
-    -- Wymusić przeładowanie find-char za każdym razem
     if game == "find-char" then
         package.loaded["vim-be-better.games.navigation.find-char"] = nil
         FindCharRound = require("vim-be-better.games.navigation.find-char")
@@ -310,7 +306,6 @@ function GameRunner:checkForNext()
         end
     end
 
-    -- todo implement this correctly....
     if foundKey then
         self.onFinished(self, foundKey)
     else
@@ -393,7 +388,6 @@ function GameRunner:renderEndGame()
 
     self.ended = true
 
-    -- TODO: Make this a bit better especially with random.
     table.insert(lines, string.format("%d / %d completed successfully", self.results.successes, self.config.roundCount))
     table.insert(lines, string.format("Average %.2f", sum / self.config.roundCount))
     table.insert(lines, string.format("Game Type %s", self.results.games[1]))
