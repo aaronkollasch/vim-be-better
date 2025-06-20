@@ -1,5 +1,3 @@
-local log = require("vim-be-better.log")
-
 local instructions = {
     "--- Regex Master ---",
     "",
@@ -217,8 +215,6 @@ local difficultyConfig = {
 local RegexMasterRound = {}
 
 function RegexMasterRound:new(difficulty, window)
-    log.info("RegexMasterRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -236,7 +232,6 @@ function RegexMasterRound:getInstructions()
 end
 
 function RegexMasterRound:getConfig()
-    log.info("RegexMasterRound:getConfig", self.difficulty)
     self:generateRound()
 
     -- longer time for regex challenges than any other rounds
@@ -275,14 +270,6 @@ function RegexMasterRound:generateRound()
     else
         self.correctTarget = { line = 1, startCol = 1, endCol = 1 }
     end
-
-    log.info("RegexMasterRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "CHALLENGE:", self.challenge.name,
-        "PATTERN:", self.challenge.pattern,
-        "TARGET:",
-        string.format("L%dC%d-C%d", self.correctTarget.line, self.correctTarget.startCol,
-            self.correctTarget.endCol or self.correctTarget.startCol))
 end
 
 function RegexMasterRound:findPatternMatches(line, pattern, lineNum)
@@ -482,23 +469,17 @@ function RegexMasterRound:setupCursorMonitoring()
             self:onCursorMoved()
         end
     })
-
-    log.info("RegexMasterRound:setupCursorMonitoring - Created augroup:", augroup_name)
 end
 
 function RegexMasterRound:cleanupCursorMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("RegexMasterRound:cleanupCursorMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 end
 
 function RegexMasterRound:onCursorMoved()
-    log.info("RegexMasterRound:onCursorMoved - Cursor moved!")
-
     if self:checkForWin() then
-        log.info("RegexMasterRound:onCursorMoved - PLAYER WON!")
         self:cleanupCursorMonitoring()
 
         if self.endRoundCallback then
@@ -523,17 +504,10 @@ function RegexMasterRound:checkForWin()
         end
     end
 
-    log.info("RegexMasterRound:checkForWin",
-        "Current:", string.format("L%dC%d", currentLineNum, currentCol),
-        "Target:", string.format("L%dC%d", targetAbsoluteLineNum or 0, self.correctTarget.startCol),
-        "Target range:",
-        string.format("C%d-C%d", self.correctTarget.startCol, self.correctTarget.endCol or self.correctTarget.startCol))
-
     if targetAbsoluteLineNum and
         currentLineNum == targetAbsoluteLineNum and
         currentCol >= self.correctTarget.startCol and
         currentCol <= (self.correctTarget.endCol or self.correctTarget.startCol) then
-        log.info("*** REGEX MASTER LEVEL COMPLETED! ***")
         return true
     end
 

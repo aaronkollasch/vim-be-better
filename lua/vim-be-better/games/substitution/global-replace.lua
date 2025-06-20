@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Global Replace Master ---",
@@ -361,8 +360,6 @@ local difficultyConfig = {
 local GlobalReplaceRound = {}
 
 function GlobalReplaceRound:new(difficulty, window)
-    log.info("GlobalReplaceRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -380,8 +377,6 @@ function GlobalReplaceRound:getInstructions()
 end
 
 function GlobalReplaceRound:getConfig()
-    log.info("GlobalReplaceRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -401,7 +396,6 @@ function GlobalReplaceRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("GlobalReplaceRound:generateChallenge", self.currentChallenge.name)
 end
 
 function GlobalReplaceRound:checkForWin()
@@ -426,11 +420,6 @@ function GlobalReplaceRound:checkForWin()
         end
     end
 
-    log.info("GlobalReplaceRound:checkForWin",
-        "start_line:", start_line,
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -444,7 +433,6 @@ function GlobalReplaceRound:checkForWin()
     end
 
     if matches then
-        log.info("GlobalReplaceRound:checkForWin - WINNER!")
         if self.endRoundCallback then
             vim.defer_fn(function()
                 self.endRoundCallback(true)
@@ -458,7 +446,6 @@ end
 
 function GlobalReplaceRound:render()
     if not self.currentChallenge then
-        log.error("GlobalReplaceRound:render - No current challenge")
         return {}, 1, 0
     end
 
@@ -475,11 +462,6 @@ function GlobalReplaceRound:render()
 
     local cursorLine = 5 + (self.currentChallenge.cursorPos.line or 1)
     local cursorCol = (self.currentChallenge.cursorPos.col or 1) - 1
-
-    log.info("GlobalReplaceRound:render",
-        "challenge:", self.currentChallenge.name,
-        "lines:", #lines,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end

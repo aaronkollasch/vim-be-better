@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Substitution Master ---",
@@ -286,8 +285,6 @@ local difficultyConfig = {
 local SubstitutionBasicRound = {}
 
 function SubstitutionBasicRound:new(difficulty, window)
-    log.info("SubstitutionBasicRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -307,7 +304,6 @@ function SubstitutionBasicRound:getInstructions()
 end
 
 function SubstitutionBasicRound:getConfig()
-    log.info("SubstitutionBasicRound:getConfig", self.difficulty)
     self:generateRound()
     return {
         roundTime = GameUtils.difficultyToTime[self.difficulty] or 30000,
@@ -322,13 +318,6 @@ function SubstitutionBasicRound:generateRound()
     self.challenge = config.challenges[math.random(#config.challenges)]
     self.startText = vim.deepcopy(self.challenge.startText)
     self.expectedResult = vim.deepcopy(self.challenge.expectedResult)
-
-    log.info("SubstitutionBasicRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "CHALLENGE:", self.challenge.name,
-        "START TEXT:", vim.inspect(self.startText),
-        "EXPECTED:", vim.inspect(self.expectedResult),
-        "COMMAND:", self.challenge.command)
 end
 
 function SubstitutionBasicRound:render()
@@ -344,9 +333,6 @@ function SubstitutionBasicRound:render()
     if self.difficulty == "noob" or self.difficulty == "easy" then
         table.insert(lines, string.format("Command: %s", self.challenge.command))
     end
-
-    log.info("SubstitutionBasicRound:render",
-        "RENDERED_LINES:", vim.inspect(lines))
 
     vim.defer_fn(function()
         self:setupOperationMonitoring()
@@ -375,12 +361,9 @@ function SubstitutionBasicRound:setupOperationMonitoring()
             self:onCommandExecuted()
         end
     })
-
-    log.info("SubstitutionBasicRound:setupOperationMonitoring - Created augroup:", augroup_name)
 end
 
 function SubstitutionBasicRound:onTextChanged()
-    log.info("SubstitutionBasicRound:onTextChanged - Text changed!")
     self.operationExecuted = true
 
     if self.checkTimer then
@@ -389,7 +372,6 @@ function SubstitutionBasicRound:onTextChanged()
 
     self.checkTimer = vim.fn.timer_start(300, function()
         if self:checkForWin() then
-            log.info("SubstitutionBasicRound:onTextChanged - PLAYER WON!")
             self:cleanupOperationMonitoring()
 
             if self.endRoundCallback then
@@ -400,12 +382,10 @@ function SubstitutionBasicRound:onTextChanged()
 end
 
 function SubstitutionBasicRound:onCommandExecuted()
-    log.info("SubstitutionBasicRound:onCommandExecuted - Command executed!")
     self.operationExecuted = true
 
     vim.defer_fn(function()
         if self:checkForWin() then
-            log.info("SubstitutionBasicRound:onCommandExecuted - PLAYER WON!")
             self:cleanupOperationMonitoring()
 
             if self.endRoundCallback then
@@ -417,16 +397,10 @@ end
 
 function SubstitutionBasicRound:checkForWin()
     if not self.operationExecuted then
-        log.info("SubstitutionBasicRound:checkForWin - No operation executed yet")
         return false
     end
 
     local all_lines = self.window.buffer:getGameLines()
-
-    log.info("SubstitutionBasicRound:checkForWin",
-        "ALL_GAME_LINES:", vim.inspect(all_lines),
-        "EXPECTED_RESULT:", vim.inspect(self.expectedResult))
-
     local actual_text = {}
     local found_start = false
     local start_idx = 1
@@ -440,7 +414,6 @@ function SubstitutionBasicRound:checkForWin()
     end
 
     if not found_start then
-        log.info("SubstitutionBasicRound:checkForWin - Could not find start of text")
         return false
     end
 
@@ -448,31 +421,19 @@ function SubstitutionBasicRound:checkForWin()
         actual_text[i] = all_lines[start_idx + i - 1] or ""
     end
 
-    log.info("SubstitutionBasicRound:checkForWin",
-        "START_IDX:", start_idx,
-        "ACTUAL_TEXT:", vim.inspect(actual_text),
-        "EXPECTED_TEXT:", vim.inspect(self.expectedResult))
-
     local matches = true
     if #actual_text == #self.expectedResult then
         for i = 1, #self.expectedResult do
             if actual_text[i] ~= self.expectedResult[i] then
-                log.info("SubstitutionBasicRound:checkForWin - Mismatch at line", i,
-                    "Expected:", self.expectedResult[i],
-                    "Actual:", actual_text[i])
                 matches = false
                 break
             end
         end
     else
-        log.info("SubstitutionBasicRound:checkForWin - Length mismatch",
-            "Expected length:", #self.expectedResult,
-            "Actual length:", #actual_text)
         matches = false
     end
 
     if matches then
-        log.info("*** SUBSTITUTION BASIC LEVEL COMPLETED! ***")
         return true
     end
 
@@ -482,7 +443,6 @@ end
 function SubstitutionBasicRound:cleanupOperationMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("SubstitutionBasicRound:cleanupOperationMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 
