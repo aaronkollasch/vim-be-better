@@ -31,6 +31,8 @@ local DotRepeatRound = require("vim-be-better.games.advanced.dot-repeat")
 local FoldMasterRound = require("vim-be-better.games.advanced.fold-master")
 local CommentToggleRound = require("vim-be-better.games.advanced.comment-toggle")
 
+local SpeedEditingRound = require("vim-be-better.games.mixed.speed-editing")
+
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
 
@@ -148,7 +150,7 @@ local newGames = {
         return PlaceholderGame:new(difficulty, window, "Vim Golf")
     end,
     ["speed-editing"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Speed Editing")
+        return SpeedEditingRound:new(difficulty, window)
     end,
     ["refactor-race"] = function(difficulty, window)
         return PlaceholderGame:new(difficulty, window, "Refactor Race")
