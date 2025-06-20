@@ -9,6 +9,9 @@ It was created on top of the fork of [vim-be-good plugin](https://github.com/The
 - **Progressive difficulty system** (noob → easy → medium → hard → nightmare → tpope)
 - **Comprehensive vim motion coverage** from basic navigation to advanced text objects
 
+## Do you want any game to be added to this plugin?
+I'm actively working on this plugin in my free time. If you have any suggestions about new game(s) to be added, feel free to open a new Issue.
+
 ## Installation
 
 ### Requirements
