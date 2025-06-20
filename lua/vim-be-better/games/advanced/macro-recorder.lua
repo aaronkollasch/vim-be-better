@@ -1,5 +1,3 @@
-local log = require("vim-be-better.log")
-
 local instructions = {
     "--- Macro Recorder ---",
     "",
@@ -318,8 +316,6 @@ local difficultyConfig = {
 local MacroRecorderRound = {}
 
 function MacroRecorderRound:new(difficulty, window)
-    log.info("MacroRecorderRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -336,8 +332,6 @@ function MacroRecorderRound:getInstructions()
 end
 
 function MacroRecorderRound:getConfig()
-    log.info("MacroRecorderRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -366,7 +360,6 @@ function MacroRecorderRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("MacroRecorderRound:generateChallenge", self.currentChallenge.name)
 end
 
 function MacroRecorderRound:checkForWin()
@@ -404,18 +397,6 @@ function MacroRecorderRound:checkForWin()
         end
     end
 
-    log.info("MacroRecorderRound:checkForWin",
-        "Expected lines:", #self.currentChallenge.expectedText,
-        "Current lines:", #currentCodeLines,
-        "Code start line:", codeStartLine,
-        "Expected:", vim.inspect(self.currentChallenge.expectedText),
-        "Current:", vim.inspect(currentCodeLines),
-        "Match:", matches)
-
-    if matches then
-        log.info("MacroRecorderRound:checkForWin - SUCCESS! Macro transformation completed")
-    end
-
     return matches
 end
 
@@ -447,11 +428,6 @@ function MacroRecorderRound:render()
         table.insert(lines, "Macro: " .. self.currentChallenge.macroSteps)
         table.insert(lines, "Execute: " .. self.currentChallenge.execution)
     end
-
-    log.info("MacroRecorderRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol,
-        "task:", self.currentChallenge.task)
 
     return lines, cursorLine, cursorCol
 end
