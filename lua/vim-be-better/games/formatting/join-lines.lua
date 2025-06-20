@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Join Lines Master ---",
@@ -306,8 +305,6 @@ local difficultyConfig = {
 local JoinLinesRound = {}
 
 function JoinLinesRound:new(difficulty, window)
-    log.info("JoinLinesRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -324,8 +321,6 @@ function JoinLinesRound:getInstructions()
 end
 
 function JoinLinesRound:getConfig()
-    log.info("JoinLinesRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -345,7 +340,6 @@ function JoinLinesRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("JoinLinesRound:generateChallenge", self.currentChallenge.name)
 end
 
 function JoinLinesRound:checkForWin()
@@ -373,10 +367,6 @@ function JoinLinesRound:checkForWin()
         end
     end
 
-    log.info("JoinLinesRound:checkForWin",
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -387,10 +377,6 @@ function JoinLinesRound:checkForWin()
         end
     else
         matches = false
-    end
-
-    if matches then
-        log.info("JoinLinesRound:checkForWin - SUCCESS!")
     end
 
     return matches
@@ -412,10 +398,6 @@ function JoinLinesRound:render()
     if (self.difficulty == "noob" or self.difficulty == "easy") and self.currentChallenge.operation then
         table.insert(lines, "Operation: " .. self.currentChallenge.operation)
     end
-
-    log.info("JoinLinesRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end

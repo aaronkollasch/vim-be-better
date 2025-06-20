@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Indent Master ---",
@@ -255,8 +254,6 @@ local difficultyConfig = {
 local IndentMasterRound = {}
 
 function IndentMasterRound:new(difficulty, window)
-    log.info("IndentMasterRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -273,8 +270,6 @@ function IndentMasterRound:getInstructions()
 end
 
 function IndentMasterRound:getConfig()
-    log.info("IndentMasterRound:getConfig", self.difficulty)
-
     vim.opt.shiftwidth = 4
     vim.opt.tabstop = 4
     vim.opt.expandtab = true
@@ -297,7 +292,6 @@ function IndentMasterRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("IndentMasterRound:generateChallenge", self.currentChallenge.name)
 end
 
 function IndentMasterRound:checkForWin()
@@ -325,10 +319,6 @@ function IndentMasterRound:checkForWin()
         end
     end
 
-    log.info("IndentMasterRound:checkForWin",
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -339,10 +329,6 @@ function IndentMasterRound:checkForWin()
         end
     else
         matches = false
-    end
-
-    if matches then
-        log.info("IndentMasterRound:checkForWin - SUCCESS!")
     end
 
     return matches
@@ -360,10 +346,6 @@ function IndentMasterRound:render()
     table.insert(lines, "")
     table.insert(lines, "--- HINT ---")
     table.insert(lines, self.currentChallenge.hint)
-
-    log.info("IndentMasterRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end

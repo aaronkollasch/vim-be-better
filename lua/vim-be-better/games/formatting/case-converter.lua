@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Case Converter ---",
@@ -261,8 +260,6 @@ local difficultyConfig = {
 local CaseConverterRound = {}
 
 function CaseConverterRound:new(difficulty, window)
-    log.info("CaseConverterRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -279,8 +276,6 @@ function CaseConverterRound:getInstructions()
 end
 
 function CaseConverterRound:getConfig()
-    log.info("CaseConverterRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -300,7 +295,6 @@ function CaseConverterRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("CaseConverterRound:generateChallenge", self.currentChallenge.name)
 end
 
 function CaseConverterRound:checkForWin()
@@ -328,10 +322,6 @@ function CaseConverterRound:checkForWin()
         end
     end
 
-    log.info("CaseConverterRound:checkForWin",
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -342,10 +332,6 @@ function CaseConverterRound:checkForWin()
         end
     else
         matches = false
-    end
-
-    if matches then
-        log.info("CaseConverterRound:checkForWin - SUCCESS!")
     end
 
     return matches
@@ -367,10 +353,6 @@ function CaseConverterRound:render()
     if (self.difficulty == "noob" or self.difficulty == "easy") and self.currentChallenge.operation then
         table.insert(lines, "Operation: " .. self.currentChallenge.operation)
     end
-
-    log.info("CaseConverterRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end
