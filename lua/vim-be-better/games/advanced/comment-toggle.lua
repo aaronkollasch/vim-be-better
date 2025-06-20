@@ -1,4 +1,3 @@
-local log = require("vim-be-better.log")
 local difficultyConfig = require("vim-be-better.games.advanced.configs.comment-toggle-config")
 
 local instructions = {
@@ -25,8 +24,6 @@ local instructions = {
 local CommentToggleRound = {}
 
 function CommentToggleRound:new(difficulty, window)
-    log.info("CommentToggleRound:new", difficulty, window)
-
     local round = {}
     setmetatable(round, { __index = CommentToggleRound })
 
@@ -44,8 +41,6 @@ function CommentToggleRound:getInstructions()
 end
 
 function CommentToggleRound:getConfig()
-    log.info("CommentToggleRound:getConfig", self.difficulty)
-
     local timeConfig = {
         noob = 45000,
         easy = 40000,
@@ -69,19 +64,14 @@ function CommentToggleRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("CommentToggleRound:generateChallenge", self.currentChallenge.name)
 end
 
 function CommentToggleRound:checkForWin()
-    log.info("CommentToggleRound:checkForWin START")
-
     if not self.currentChallenge then
-        log.info("CommentToggleRound:checkForWin - no currentChallenge")
         return false
     end
 
     if not self.window or not self.window.bufh then
-        log.info("CommentToggleRound:checkForWin - no window/buffer")
         return false
     end
 
@@ -96,7 +86,6 @@ function CommentToggleRound:checkForWin()
     end
 
     if not codeStartLine then
-        log.info("CommentToggleRound:checkForWin - no code section found")
         return false
     end
 
@@ -112,15 +101,7 @@ function CommentToggleRound:checkForWin()
 
     local targetLines = self.currentChallenge.targetText
 
-    log.info("CommentToggleRound:checkForWin",
-        "codeStartLine:", codeStartLine,
-        "currentLines count:", #currentLines,
-        "targetLines count:", #targetLines)
-    log.info("CommentToggleRound:checkForWin - currentLines:", vim.inspect(currentLines))
-    log.info("CommentToggleRound:checkForWin - targetLines:", vim.inspect(targetLines))
-
     if #currentLines ~= #targetLines then
-        log.info("CommentToggleRound:checkForWin - line count mismatch", #currentLines, #targetLines)
         return false
     end
 
@@ -129,20 +110,15 @@ function CommentToggleRound:checkForWin()
         local targetTrimmed = targetLines[i]:gsub("%s+$", "")
 
         if currentTrimmed ~= targetTrimmed then
-            log.info("CommentToggleRound:checkForWin - line mismatch at", i,
-                "current:", vim.inspect(currentTrimmed),
-                "target:", vim.inspect(targetTrimmed))
             return false
         end
     end
 
-    log.info("CommentToggleRound:checkForWin - SUCCESS! Comment toggle mastery achieved")
     return true
 end
 
 function CommentToggleRound:render()
     if not self.currentChallenge then
-        log.info("CommentToggleRound:render - no currentChallenge")
         return {}, 0, 0
     end
 
@@ -174,11 +150,6 @@ function CommentToggleRound:render()
     local cursorLine = codeStartLine + (self.currentChallenge.cursorPos.line - 1)
     local cursorCol = self.currentChallenge.cursorPos.col - 1
 
-    log.info("CommentToggleRound:render",
-        "challenge=" .. self.currentChallenge.name,
-        "lines=" .. #lines,
-        "cursor=" .. cursorLine .. "," .. cursorCol)
-
     return lines, cursorLine, cursorCol
 end
 
@@ -187,14 +158,12 @@ function CommentToggleRound:name()
 end
 
 function CommentToggleRound:setEndRoundCallback(callback)
-    log.info("CommentToggleRound:setEndRoundCallback", callback ~= nil)
     self.endRoundCallback = callback
     self.winDetected = false
 
     if self.currentChallenge and self.currentChallenge.fileType and self.window and self.window.bufh then
         vim.schedule(function()
             vim.api.nvim_buf_set_option(self.window.bufh, 'filetype', self.currentChallenge.fileType)
-            log.info("CommentToggleRound:setEndRoundCallback - set filetype", self.currentChallenge.fileType)
 
             self:setupTextChangeMonitoring()
         end)
@@ -214,21 +183,16 @@ function CommentToggleRound:setupTextChangeMonitoring()
             self:onTextChanged()
         end
     })
-
-    log.info("CommentToggleRound:setupTextChangeMonitoring - Created augroup:", augroup_name)
 end
 
 function CommentToggleRound:cleanupTextChangeMonitoring()
     if self.textCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.textCheckAugroup)
-        log.info("CommentToggleRound:cleanupTextChangeMonitoring - Removed augroup:", self.textCheckAugroup)
         self.textCheckAugroup = nil
     end
 end
 
 function CommentToggleRound:onTextChanged()
-    log.info("CommentToggleRound:onTextChanged - Text changed!")
-
     if self.winDetected then
         return
     end
@@ -239,7 +203,6 @@ function CommentToggleRound:onTextChanged()
         end
 
         if self:checkForWin() then
-            log.info("CommentToggleRound:onTextChanged - PLAYER WON!")
             self.winDetected = true
             self:cleanupTextChangeMonitoring()
 
@@ -251,7 +214,6 @@ function CommentToggleRound:onTextChanged()
 end
 
 function CommentToggleRound:cleanup()
-    log.info("CommentToggleRound:cleanup")
     self:cleanupTextChangeMonitoring()
     self.endRoundCallback = nil
     self.winDetected = false
