@@ -217,8 +217,6 @@ local difficultyConfig = {
 local BracketJumpRound = {}
 
 function BracketJumpRound:new(difficulty, window)
-    log.info("BracketJumpRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -237,8 +235,6 @@ function BracketJumpRound:getInstructions()
 end
 
 function BracketJumpRound:getConfig()
-    log.info("BracketJumpRound:getConfig", self.difficulty)
-
     self:generateRound()
 
     return {
@@ -315,13 +311,6 @@ function BracketJumpRound:generateRound()
         self.startPos = { line = 1, col = 4 }
         self.targetPos = { line = 3, col = 1 }
     end
-
-    log.info("BracketJumpRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "MOTION:", self.motion,
-        "START:", string.format("L%dC%d", self.startPos.line, self.startPos.col),
-        "TARGET:", string.format("L%dC%d", self.targetPos.line, self.targetPos.col),
-        "LINES:", #self.codeLines)
 end
 
 function BracketJumpRound:render()
@@ -371,23 +360,17 @@ function BracketJumpRound:setupCursorMonitoring()
             self:onCursorMoved()
         end
     })
-
-    log.info("BracketJumpRound:setupCursorMonitoring - Created augroup:", augroup_name)
 end
 
 function BracketJumpRound:cleanupCursorMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("BracketJumpRound:cleanupCursorMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 end
 
 function BracketJumpRound:onCursorMoved()
-    log.info("BracketJumpRound:onCursorMoved - Cursor moved!")
-
     if self:checkForWin() then
-        log.info("BracketJumpRound:onCursorMoved - PLAYER WON!")
         self:cleanupCursorMonitoring()
 
         if self.endRoundCallback then
@@ -412,15 +395,9 @@ function BracketJumpRound:checkForWin()
         end
     end
 
-    log.info("BracketJumpRound:checkForWin",
-        "Current:", string.format("L%dC%d", current_line, current_col),
-        "Target:", string.format("L%dC%d", target_absolute_line or 0, self.targetPos.col),
-        "CodeLine:", target_code_line)
-
     if target_absolute_line and
         current_line == target_absolute_line and
         current_col == self.targetPos.col then
-        log.info("*** BRACKET JUMP LEVEL COMPLETED! ***")
         return true
     end
 

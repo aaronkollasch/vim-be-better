@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = { "--- Word Boundary Master ---",
     "",
@@ -84,8 +83,6 @@ local difficultyConfig = {
 local WordBoundariesRound = {}
 
 function WordBoundariesRound:new(difficulty, window)
-    log.info("WordBoundariesRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -104,8 +101,6 @@ function WordBoundariesRound:getInstructions()
 end
 
 function WordBoundariesRound:getConfig()
-    log.info("WordBoundariesRound:getConfig", self.difficulty)
-
     self:generateRound()
 
     return {
@@ -170,19 +165,11 @@ function WordBoundariesRound:generateRound()
     end
 
     if not success then
-        log.warn("WordBoundariesRound:generateRound - Using fallback")
         self.textLine = "please use w to move here"
         self.motion = "w"
         self.startPos = 8
         self.targetPos = 14
     end
-
-    log.info("WordBoundariesRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "MOTION:", self.motion,
-        "START:", self.startPos,
-        "TARGET:", self.targetPos,
-        "TEXT:", self.textLine)
 end
 
 function WordBoundariesRound:render()
@@ -228,23 +215,17 @@ function WordBoundariesRound:setupCursorMonitoring()
             self:onCursorMoved()
         end
     })
-
-    log.info("WordBoundariesRound:setupCursorMonitoring - Created augroup:", augroup_name)
 end
 
 function WordBoundariesRound:cleanupCursorMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("WordBoundariesRound:cleanupCursorMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 end
 
 function WordBoundariesRound:onCursorMoved()
-    log.info("WordBoundariesRound:onCursorMoved - Cursor moved!")
-
     if self:checkForWin() then
-        log.info("WordBoundariesRound:onCursorMoved - PLAYER WON!")
         self:cleanupCursorMonitoring()
 
         if self.endRoundCallback then
@@ -268,12 +249,7 @@ function WordBoundariesRound:checkForWin()
         end
     end
 
-    log.info("WordBoundariesRound:checkForWin",
-        "Current:", "L" .. current_line, "C" .. current_col,
-        "Target:", "L" .. (game_line_num or "nil"), "C" .. self.targetPos)
-
     if game_line_num and current_line == game_line_num and current_col == self.targetPos then
-        log.info("*** WORD BOUNDARIES LEVEL COMPLETED! ***")
         return true
     end
 

@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Visual Operations ---",
@@ -270,8 +269,6 @@ local difficultyConfig = {
 local VisualOperationsRound = {}
 
 function VisualOperationsRound:new(difficulty, window)
-    log.info("VisualOperationsRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -288,8 +285,6 @@ function VisualOperationsRound:getInstructions()
 end
 
 function VisualOperationsRound:getConfig()
-    log.info("VisualOperationsRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -309,7 +304,6 @@ function VisualOperationsRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("VisualOperationsRound:generateChallenge", self.currentChallenge.name)
 end
 
 function VisualOperationsRound:checkForWin()
@@ -346,19 +340,6 @@ function VisualOperationsRound:checkForWin()
             end
         end
     end
-
-    log.info("VisualOperationsRound:checkForWin",
-        "Expected lines:", #self.currentChallenge.expectedText,
-        "Current lines:", #currentCodeLines,
-        "Code start line:", codeStartLine,
-        "Expected:", vim.inspect(self.currentChallenge.expectedText),
-        "Current:", vim.inspect(currentCodeLines),
-        "Match:", matches)
-
-    if matches then
-        log.info("VisualOperationsRound:checkForWin - SUCCESS! Code matches expected result")
-    end
-
     return matches
 end
 
@@ -388,11 +369,6 @@ function VisualOperationsRound:render()
     if (self.difficulty == "noob" or self.difficulty == "easy") and self.currentChallenge.operation then
         table.insert(lines, "Operation: " .. self.currentChallenge.operation)
     end
-
-    log.info("VisualOperationsRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol,
-        "target:", self.currentChallenge.targetWord)
 
     return lines, cursorLine, cursorCol
 end

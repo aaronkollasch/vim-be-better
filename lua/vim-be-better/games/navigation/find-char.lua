@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "SUPER SIMPLE (f/F)IND CHAR GAME!",
@@ -66,8 +65,6 @@ local linesCountConfig = {
 local FindCharRound = {}
 
 function FindCharRound:new(difficulty, window)
-    log.info("FindCharRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty,
@@ -86,8 +83,6 @@ function FindCharRound:getInstructions()
 end
 
 function FindCharRound:getConfig()
-    log.info("FindCharRound:getConfig", self.difficulty)
-
     self:generateRound()
 
     return {
@@ -126,17 +121,11 @@ function FindCharRound:generateRound()
         local colToInsert = math.random(#self.textLines[lineToModify] + 1)
         local oldLine = self.textLines[lineToModify]
         self.textLines[lineToModify] = string.sub(oldLine, 1, colToInsert - 1) ..
-        self.targetChar .. string.sub(oldLine, colToInsert)
+            self.targetChar .. string.sub(oldLine, colToInsert)
         table.insert(allOccurrences, { line = lineToModify, col = colToInsert })
     end
 
     self.correctTarget = allOccurrences[math.random(#allOccurrences)]
-
-    log.info("FindCharRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "CHAR:", self.targetChar,
-        "TARGET:", "L" .. self.correctTarget.line .. " C" .. self.correctTarget.col,
-        "LINES:", #self.textLines)
 end
 
 function FindCharRound:setupCursorMonitoring()
@@ -152,23 +141,17 @@ function FindCharRound:setupCursorMonitoring()
             self:onCursorMoved()
         end
     })
-
-    log.info("FindCharRound:setupCursorMonitoring - Created augroup:", augroup_name)
 end
 
 function FindCharRound:cleanupCursorMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("FindCharRound:cleanupCursorMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 end
 
 function FindCharRound:onCursorMoved()
-    log.info("FindCharRound:onCursorMoved - Cursor moved!")
-
     if self:checkForWin() then
-        log.info("FindCharRound:onCursorMoved - PLAYER WON!")
         self:cleanupCursorMonitoring()
 
         if self.endRoundCallback then
@@ -193,12 +176,7 @@ function FindCharRound:checkForWin()
         end
     end
 
-    log.info("=== CURSOR CHECK ===",
-        "Cursor:", "L" .. currentLineNum, "C" .. currentCol,
-        "Target:", "L" .. (targetAbsoluteLineNum or "nil"), "C" .. self.correctTarget.col)
-
     if targetAbsoluteLineNum and currentLineNum == targetAbsoluteLineNum and currentCol == self.correctTarget.col then
-        log.info("*** LEVEL COMPLETED! ***")
         return true
     end
 
