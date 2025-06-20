@@ -1,10 +1,10 @@
 local GameUtils = require("vim-be-better.game-utils");
-local RelativeRound = require("vim-be-better.games.relative");
-local WordRound = require("vim-be-better.games.words");
-local CiRound = require("vim-be-better.games.ci");
-local HjklRound = require("vim-be-better.games.hjkl");
-local WhackAMoleRound = require("vim-be-better.games.whackamole");
-local Snake = require("vim-be-better.games.snake");
+local RelativeRound = require("vim-be-better.games.legacy.relative");
+local WordRound = require("vim-be-better.games.legacy.words");
+local CiRound = require("vim-be-better.games.legacy.ci");
+local HjklRound = require("vim-be-better.games.legacy.hjkl");
+local WhackAMoleRound = require("vim-be-better.games.legacy.whackamole");
+local Snake = require("vim-be-better.games.legacy.snake");
 local PlaceholderGame = require("vim-be-better.games.placeholder");
 
 local FindCharRound = require("vim-be-better.games.navigation.find-char");
@@ -163,8 +163,6 @@ local runningId = 0
 local GameRunner = {}
 
 local function getGame(game, difficulty, window)
-    log.info("getGame", game, difficulty, window)
-
     if game == "find-char" then
         package.loaded["vim-be-better.games.navigation.find-char"] = nil
         FindCharRound = require("vim-be-better.games.navigation.find-char")
@@ -180,21 +178,18 @@ local function getGame(game, difficulty, window)
 end
 
 function GameRunner:new(selectedGames, difficulty, window, onFinished)
-    log.info("GameRunner:new", difficulty)
     local config = {
         difficulty = difficulty,
         roundCount = GameUtils.getRoundCount(difficulty),
     }
 
     local rounds = {}
-    log.info("GameRunner:new", vim.inspect(selectedGames))
 
     if selectedGames[1] == "random" then
         selectedGames = {}
         for name, _ in pairs(classicGames) do
             table.insert(selectedGames, name)
         end
-        log.info("GameRunner:new - random selected", vim.inspect(selectedGames))
     end
 
     for idx = 1, #selectedGames do
@@ -226,8 +221,6 @@ function GameRunner:new(selectedGames, difficulty, window, onFinished)
             end
             return
         end
-
-        log.info("onChange", game.state, states.playing)
 
         if game.state == states.playing then
             game:checkForWin()
@@ -274,8 +267,6 @@ function GameRunner:init()
 end
 
 function GameRunner:checkForNext()
-    log.info("GameRunner:checkForNext")
-
     local lines = self.window.buffer:getGameLines()
     local expectedLines = self:renderEndGame()
     local idx = 0
@@ -292,15 +283,8 @@ function GameRunner:checkForNext()
 
     local item = expectedLines[idx]
 
-    log.info("GameRunner:checkForNext: compared", vim.inspect(lines), vim.inspect(expectedLines))
-    log.info("GameRunner:checkForNext: deleted line is", item,
-        item == endStates.menu,
-        item == endStates.replay,
-        item == endStates.quit)
-
     local foundKey = nil
     for k, v in pairs(endStates) do
-        log.info("pairs", k, v, item)
         if item == v then
             foundKey = k
         end
@@ -309,13 +293,11 @@ function GameRunner:checkForNext()
     if foundKey then
         self.onFinished(self, foundKey)
     else
-        log.info("GameRunner:checkForNext Some line was changed that is insignificant, rerendering")
         self.window.buffer:render(expectedLines)
     end
 end
 
 function GameRunner:checkForWin()
-    log.info("GameRunner:checkForWin", self.round, self.running)
     if not self.round then
         return
     end
@@ -355,7 +337,6 @@ function GameRunner:endRound(success)
         time = totalTime,
     }
     Stats:logResult(result)
-    log.info("endRound", self.currentRound, self.config.roundCount)
     if self.currentRound >= self.config.roundCount then
         self:endGame()
         return
@@ -370,7 +351,6 @@ function GameRunner:endRound(success)
 end
 
 function GameRunner:close()
-    log.info("GameRunner:close()", debug.traceback())
     self.window.buffer:removeListener(self.onChange)
     self.ended = true
 end
