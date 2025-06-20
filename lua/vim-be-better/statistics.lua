@@ -1,4 +1,3 @@
-local log = require("vim-be-better.log")
 local default_config =  {
     plugin = 'VimBeBetterStats',
 
