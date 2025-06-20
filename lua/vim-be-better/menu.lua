@@ -45,7 +45,7 @@ local credits = {
     "Brandoncc",
     "polarmutex",
     "",
-    "https://github.com/ThePrimeagen/vim-be-better",
+    "https://github.com/ThePrimeagen/vim-be-good",
 }
 
 local MenuState = {
