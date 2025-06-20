@@ -28,6 +28,7 @@ local NumberSequenceRound = require("vim-be-better.games.numbers.number-sequence
 local MacroRecorderRound = require("vim-be-better.games.advanced.macro-recorder")
 local DotRepeatRound = require("vim-be-better.games.advanced.dot-repeat")
 local FoldMasterRound = require("vim-be-better.games.advanced.fold-master")
+local CommentToggleRound = require("vim-be-better.games.advanced.comment-toggle")
 
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
@@ -146,7 +147,7 @@ local newGames = {
         return FoldMasterRound:new(difficulty, window)
     end,
     ["comment-toggle"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Comment Toggle")
+        return CommentToggleRound:new(difficulty, window)
     end,
 
     -- Mixed Challenges
