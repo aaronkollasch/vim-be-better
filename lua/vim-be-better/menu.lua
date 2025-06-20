@@ -2,7 +2,6 @@ local log = require("vim-be-better.log")
 local bind = require("vim-be-better.bind")
 local types = require("vim-be-better.types")
 
--- log configuration - I HAVE TO DELETE THIS IN PRODUCTIOn
 vim.g["vim_be_better_log_file"] = true
 vim.g["vim_be_better_log_console"] = false
 
@@ -16,19 +15,19 @@ local categoryHeader = {
 
 local gameHeader = {
     "",
-    "Select a Game (select with [x])",
+    "Select a Game (select with \"x\" key)",
     "-------------------------------",
 }
 
 local difficultyHeader = {
     "",
-    "Select a Difficulty (select with [x])",
+    "Select a Difficulty (select with \"x\" key)",
     "Noob difficulty is endless so it must be quit with :q",
     "----------------------------------------------------",
 }
 
 local instructions = {
-    "VimBebetter is a collection of small games for neovim which are",
+    "VimBeBetter is a fork of VimBeGood - collection of small games for neovim which are",
     "intended to help you improve your vim proficiency.",
     "First select a category, then a game, and finally a difficulty.",
     "Change [x] to select options."
@@ -37,12 +36,16 @@ local instructions = {
 local credits = {
     "",
     "",
+    "VimBeBetter was created by Szymon Wilczek",
+    "github.com/szymonwilczek/vim-be-better",
+    "",
+    "",
+    "Original credits for VimBeGood:",
     "Created by ThePrimeagen",
     "Brandoncc",
     "polarmutex",
     "",
     "https://github.com/ThePrimeagen/vim-be-better",
-    "https://twitch.tv/ThePrimeagen",
 }
 
 local MenuState = {
@@ -73,10 +76,6 @@ function Menu:new(window, onResults)
 
     createdMenu._onChange = bind(createdMenu, "onChange")
     window.buffer:onChange(createdMenu._onChange)
-
-    log.info("Menu:new - Menu utworzone pomyślnie",
-        "state:", menuObj.currentState,
-        "difficulty:", menuObj.difficulty)
 
     return createdMenu
 end
@@ -136,9 +135,6 @@ function Menu:buildLineTypeMap()
     end
 
     self.lineTypeMap = map
-    log.info("Menu:buildLineTypeMap - Mapa typów linii utworzona",
-        "state:", self.currentState,
-        "total_lines:", lineIndex - 1)
     return map
 end
 
@@ -146,43 +142,28 @@ function Menu:detectChanges(currentLines)
     local expectedLength = self:getExpectedMenuLength()
     local currentLength = #currentLines
 
-    log.info("Menu:detectChanges - Sprawdzanie zmian",
-        "state:", self.currentState,
-        "expected_length:", expectedLength,
-        "current_length:", currentLength)
-
     if currentLength ~= expectedLength then
-        log.warn("Menu:detectChanges - Wykryto zmianę długości menu")
         return true, "length_mismatch"
     end
 
     for i, line in ipairs(currentLines) do
         local lineInfo = self.lineTypeMap[i]
         if not lineInfo then
-            log.error("Menu:detectChanges - Brak informacji o linii", "line_index:", i)
             return true, "unknown_line"
         end
 
         local expectedLine = self:getExpectedLineContent(lineInfo)
         if line ~= expectedLine then
-            log.info("Menu:detectChanges - Wykryto modyfikację linii",
-                "line_index:", i,
-                "type:", lineInfo.type,
-                "expected:", expectedLine,
-                "actual:", line)
 
             if lineInfo.type == "category" then
-                log.info("Menu:detectChanges - Wykryto wybór kategorii", "category:", lineInfo.value)
                 return false, "category_selected", lineInfo.value
             end
 
             if lineInfo.type == "game" then
-                log.info("Menu:detectChanges - Wykryto wybór gry", "game:", lineInfo.value)
                 return false, "game_selected", lineInfo.value
             end
 
             if lineInfo.type == "difficulty" then
-                log.info("Menu:detectChanges - Wykryto wybór poziomu trudności", "difficulty:", lineInfo.value)
                 return false, "difficulty_selected", lineInfo.value
             end
 
@@ -214,14 +195,10 @@ end
 
 function Menu:onChange()
     if self.isRerendering then
-        log.info("Menu:onChange - Pomijanie onChange podczas re-renderowania")
         return
     end
 
     local currentLines = self.window.buffer:getGameLines()
-    log.info("Menu:onChange - Wykryto zmianę w menu",
-        "state:", self.currentState,
-        "lines_count:", #currentLines)
 
     if not self.lineTypeMap or #self.lineTypeMap == 0 then
         self:buildLineTypeMap()
@@ -230,52 +207,41 @@ function Menu:onChange()
     local hasChanges, changeType, selectedValue = self:detectChanges(currentLines)
 
     if changeType == "category_selected" then
-        log.info("Menu:onChange - Wybrano kategorię", "category:", selectedValue)
         self.selectedCategory = selectedValue
         self.currentState = MenuState.GAME_SELECTION
         self:safeRerender("category_change")
         return
     elseif changeType == "game_selected" then
-        log.info("Menu:onChange - Wybrano grę", "game:", selectedValue)
         self.selectedGame = selectedValue
         self.currentState = MenuState.DIFFICULTY_SELECTION
         self:safeRerender("game_change")
         return
     elseif changeType == "difficulty_selected" then
-        log.info("Menu:onChange - Uruchamianie gry",
-            "game:", self.selectedGame,
-            "difficulty:", selectedValue)
         self.difficulty = selectedValue
 
         local ok, msg = pcall(self.onResults, self.selectedGame, self.difficulty)
         if not ok then
-            log.error("Menu:onChange - Błąd podczas uruchamiania gry", "error:", msg)
+            log.error("Menu:onChange - Error while trying to run a game: ", "error:", msg)
         end
         return
     elseif hasChanges then
-        log.warn("Menu:onChange - Wykryto niepożądane zmiany, wykonuję re-render",
-            "change_type:", changeType)
         self:safeRerender("restore_menu")
         return
     end
-
-    log.info("Menu:onChange - Brak zmian wymagających akcji")
 end
 
 function Menu:safeRerender(reason)
-    log.info("Menu:safeRerender - Rozpoczynanie bezpiecznego re-renderowania",
+    log.info("Menu:safeRerender - starting re-rendering",
         "reason:", reason,
         "state:", self.currentState)
 
     if self.isRerendering then
-        log.warn("Menu:safeRerender - Re-renderowanie już w toku, pomijanie")
         return
     end
 
     self.isRerendering = true
 
     vim.schedule(function()
-        log.info("Menu:safeRerender - Wykonywanie re-renderowania")
 
         pcall(function()
             self:render()
@@ -283,7 +249,6 @@ function Menu:safeRerender(reason)
 
         vim.defer_fn(function()
             self.isRerendering = false
-            log.info("Menu:safeRerender - Re-renderowanie zakończone")
         end, 50)
     end)
 end
@@ -296,12 +261,6 @@ function Menu:createMenuItem(str, currentValue)
 end
 
 function Menu:render()
-    log.info("Menu:render - Rozpoczynanie renderowania menu",
-        "state:", self.currentState,
-        "selected_category:", self.selectedCategory,
-        "selected_game:", self.selectedGame,
-        "difficulty:", self.difficulty)
-
     self.window.buffer:clearGameLines()
 
     local lines = {}
@@ -342,14 +301,9 @@ function Menu:render()
     self:buildLineTypeMap()
 
     self.window.buffer:render(lines)
-
-    log.info("Menu:render - Renderowanie zakończone",
-        "total_lines:", #lines,
-        "state:", self.currentState)
 end
 
 function Menu:close()
-    log.info("Menu:close - Zamykanie menu")
     if self.buffer and self._onChange then
         self.buffer:removeListener(self._onChange)
     end
