@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Number Sequence Master ---",
@@ -327,8 +326,6 @@ local difficultyConfig = {
 local NumberSequenceRound = {}
 
 function NumberSequenceRound:new(difficulty, window)
-    log.info("NumberSequenceRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -345,8 +342,6 @@ function NumberSequenceRound:getInstructions()
 end
 
 function NumberSequenceRound:getConfig()
-    log.info("NumberSequenceRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -367,7 +362,6 @@ function NumberSequenceRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("NumberSequenceRound:generateChallenge", self.currentChallenge.name)
 end
 
 function NumberSequenceRound:checkForWin()
@@ -395,10 +389,6 @@ function NumberSequenceRound:checkForWin()
         end
     end
 
-    log.info("NumberSequenceRound:checkForWin",
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -409,10 +399,6 @@ function NumberSequenceRound:checkForWin()
         end
     else
         matches = false
-    end
-
-    if matches then
-        log.info("NumberSequenceRound:checkForWin - SUCCESS!")
     end
 
     return matches
@@ -434,10 +420,6 @@ function NumberSequenceRound:render()
     if (self.difficulty == "noob" or self.difficulty == "easy") and self.currentChallenge.operation then
         table.insert(lines, "Operation: " .. self.currentChallenge.operation)
     end
-
-    log.info("NumberSequenceRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end

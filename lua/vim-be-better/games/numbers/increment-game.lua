@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Increment Game ---",
@@ -298,8 +297,6 @@ local difficultyConfig = {
 local IncrementGameRound = {}
 
 function IncrementGameRound:new(difficulty, window)
-    log.info("IncrementGameRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -316,8 +313,6 @@ function IncrementGameRound:getInstructions()
 end
 
 function IncrementGameRound:getConfig()
-    log.info("IncrementGameRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -338,7 +333,6 @@ function IncrementGameRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("IncrementGameRound:generateChallenge", self.currentChallenge.name)
 end
 
 function IncrementGameRound:checkForWin()
@@ -366,10 +360,6 @@ function IncrementGameRound:checkForWin()
         end
     end
 
-    log.info("IncrementGameRound:checkForWin",
-        "Expected:", vim.inspect(self.currentChallenge.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.currentChallenge.expectedResult then
         for i = 1, #self.currentChallenge.expectedResult do
@@ -380,10 +370,6 @@ function IncrementGameRound:checkForWin()
         end
     else
         matches = false
-    end
-
-    if matches then
-        log.info("IncrementGameRound:checkForWin - SUCCESS!")
     end
 
     return matches
@@ -405,10 +391,6 @@ function IncrementGameRound:render()
     if (self.difficulty == "noob" or self.difficulty == "easy") and self.currentChallenge.operation then
         table.insert(lines, "Operation: " .. self.currentChallenge.operation)
     end
-
-    log.info("IncrementGameRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol)
 
     return lines, cursorLine, cursorCol
 end
