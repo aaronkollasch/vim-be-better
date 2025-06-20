@@ -33,6 +33,7 @@ local CommentToggleRound = require("vim-be-better.games.advanced.comment-toggle"
 
 local SpeedEditingRound = require("vim-be-better.games.mixed.speed-editing")
 local RefactorRaceRound = require("vim-be-better.games.mixed.refactor-race")
+local VimGolfRound = require("vim-be-better.games.mixed.vim-golf")
 
 local log = require("vim-be-better.log");
 local statistics = require("vim-be-better.statistics");
@@ -148,7 +149,7 @@ local newGames = {
 
     -- Mixed Challenges
     ["vim-golf"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Vim Golf")
+        return VimGolfRound:new(difficulty, window)
     end,
     ["speed-editing"] = function(difficulty, window)
         return SpeedEditingRound:new(difficulty, window)
