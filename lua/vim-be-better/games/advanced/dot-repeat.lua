@@ -1,5 +1,3 @@
-local log = require("vim-be-better.log")
-
 local instructions = {
     "--- Dot Repeat Master ---",
     "",
@@ -314,8 +312,6 @@ local difficultyConfig = {
 local DotRepeatRound = {}
 
 function DotRepeatRound:new(difficulty, window)
-    log.info("DotRepeatRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -332,8 +328,6 @@ function DotRepeatRound:getInstructions()
 end
 
 function DotRepeatRound:getConfig()
-    log.info("DotRepeatRound:getConfig", self.difficulty)
-
     vim.schedule(function()
         if self.window and self.window.bufh then
             vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
@@ -362,7 +356,6 @@ function DotRepeatRound:generateChallenge()
     local config = difficultyConfig[difficultyKey] or difficultyConfig.easy
 
     self.currentChallenge = config.challenges[math.random(#config.challenges)]
-    log.info("DotRepeatRound:generateChallenge", self.currentChallenge.name)
 end
 
 function DotRepeatRound:checkForWin()
@@ -399,19 +392,6 @@ function DotRepeatRound:checkForWin()
             end
         end
     end
-
-    log.info("DotRepeatRound:checkForWin",
-        "Expected lines:", #self.currentChallenge.expectedText,
-        "Current lines:", #currentCodeLines,
-        "Code start line:", codeStartLine,
-        "Expected:", vim.inspect(self.currentChallenge.expectedText),
-        "Current:", vim.inspect(currentCodeLines),
-        "Match:", matches)
-
-    if matches then
-        log.info("DotRepeatRound:checkForWin - SUCCESS! Dot repeat mastery achieved")
-    end
-
     return matches
 end
 
@@ -442,11 +422,6 @@ function DotRepeatRound:render()
         table.insert(lines, "")
         table.insert(lines, "Strategy: " .. self.currentChallenge.operation)
     end
-
-    log.info("DotRepeatRound:render",
-        "challenge:", self.currentChallenge.name,
-        "cursor:", cursorLine, cursorCol,
-        "task:", self.currentChallenge.task)
 
     return lines, cursorLine, cursorCol
 end
