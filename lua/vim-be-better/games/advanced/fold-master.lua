@@ -1,5 +1,5 @@
 local log = require("vim-be-better.log")
-local difficultyConfig = require("vim-be-better.games.advanced.fold-master-config")
+local difficultyConfig = require("vim-be-better.games.advanced.configs.fold-master-config")
 
 local instructions = {
     "--- Fold Master ---",
