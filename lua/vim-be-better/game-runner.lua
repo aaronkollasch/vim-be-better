@@ -17,6 +17,7 @@ local BlockEditRound = require("vim-be-better.games.text-objects.block-edit")
 
 local SubstituteBasicRound = require("vim-be-better.games.substitution.substitute-basic")
 local RegexMasterRound = require("vim-be-better.games.substitution.regex-master")
+local GlobalReplaceRound = require("vim-be-better.games.substitution.global-replace")
 
 local IndentMasterRound = require("vim-be-better.games.formatting.indent-master")
 local CaseConverterRound = require("vim-be-better.games.formatting.case-converter")
@@ -103,7 +104,7 @@ local newGames = {
         return RegexMasterRound:new(difficulty, window)
     end,
     ["global-replace"] = function(difficulty, window)
-        return PlaceholderGame:new(difficulty, window, "Global Replace")
+        return GlobalReplaceRound:new(difficulty, window)
     end,
 
     -- Formatting
