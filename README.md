@@ -1,149 +1,412 @@
-# vim-be-good
+# vim-be-better
 
-Vim be good is a plugin designed to make you better at vim by creating a game
-to practice basic movements in.
+A comprehensive vim training plugin featuring game-based exercises to improve your vim skills through structured practice and challenges.
+It was created on top of the fork of [vim-be-good plugin](https://github.com/ThePrimeagen/vim-be-good)
 
-## Programmed with Love and Fury
+## Features
 
-and tunes https://www.youtube.com/watch?v=emOKaGi8u5U
-
-## WARNING
-
--   The code is a heaping pile of awfulness. It was developed live on Twitch,
-    which means I did not carefully think through anything other than memes.
--   If you wish to create your own game, look at how relative is done.
-    Everything else should be straight forward, except for the parts that are
-    not.
-
-## Difficulty
-
-The difficulty only works on a few games for now. Still a work in progress,
-if you have any ideas, please submit them either as tickets or as a PR.
-
-## Ideas?
-
-Please submit a ticket for your idea!!!
-
-## Options
-
-### Games - relative
-
-By default vim be good returns random offset for game difficulty above noob, if
-you wish to set fixed offset set `vim_be_good_delete_me_offset` to desired
-value.
-
-`let g:vim_be_good_delete_me_offset = 35`
-
-## Instructions are at the top of games.
-
-here too!
-
-To play `relative` you need to delete the line that
-says `DELETE ME`. Use relative jumps
-
-To play `ci{` you need to replace the contents
-inside the _first_ { or [ with bar. HINT, use ci[
-or ci{ and type bar.
-
-To play `whackamole` you need to navigate to the character with the caret under
-it as fast as possible. Once you have reached the character, flip the
-character's case to complete the round.
+- **25+ Different Games** across 8 categories
+- **Progressive difficulty system** (noob → easy → medium → hard → nightmare → tpope)
+- **Comprehensive vim motion coverage** from basic navigation to advanced text objects
 
 ## Installation
 
-## MUST USE NEOVIM 5.x!!!!!!
+### Requirements
+- Neovim 0.8.0+
 
-1. Use your favorite plugin manager to install! Only works on Nvim, the one true
-   vim.
+### Plugin Managers
 
-```viml
-Plug 'ThePrimeagen/vim-be-good'
+#### lazy.nvim
+```lua
+{
+  'szymonwilczek/vim-be-better',
+  config = function()
+    -- Optional: Enable logging for debugging
+    vim.g.vim_be_better_log_file = 1
+  end
+}
 ```
 
-### Docker
+#### vim-plug
+```vim
+Plug 'szymonwilczek/vim-be-better'
+```
 
-If you would like, you can use docker to run the game. Doing this will
-automatically use the correct version of neovim for you, as well as run the
-game immediately when neovim starts.
+#### packer.nvim
+```lua
+use 'szymonwilczek/vim-be-better'
+```
 
-#### Stable image
+## Quick Start
 
-[This image](https://github.com/brandoncc/docker-vim-be-good/blob/master/stable/Dockerfile) always runs the version of the game that was bundled when the image
-was built. Images are generally built within one day of the main branch
-receiving new commits, but you won't get the new images unless you manually run
-`docker pull brandoncc/vim-be-good:stable` periodically.
+1. Open Neovim in an empty buffer
+2. Run `:VimBeBetter` to open the game menu
+3. Select a category and difficulty level (using 'x' - not 'dd' like in original plugin)
+4. Complete the challenges to improve your vim skills
+
+## Game Categories
+
+### 🎯 Navigation
+Master vim's movement commands and navigation techniques.
+
+#### find-char
+Practice using `f`, `F`, `t`, `T` motions to quickly navigate to specific characters.
+
+```
+Challenge: Find the character marked with '^'
+Text: The quick brown fox jumps over the lazy dog
+      ^
+Use: f, F, t, T motions
+```
+
+#### word-boundaries
+Learn efficient word-based navigation with `w`, `b`, `e`, `ge`.
+
+```
+Challenge: Navigate to specific word boundaries
+function validateEmail(email) { return email.includes('@'); }
+         ^              ^
+Target positions marked with ^
+```
+
+#### bracket-jump
+Master bracket matching with `%` and related motions.
+
+```
+Challenge: Jump between matching brackets
+if (condition && (nested || check)) {
+^                 ^      ^       ^
+Navigate efficiently between all bracket pairs
+```
+
+#### visual-precision
+Practice precise text selection using visual mode operations.
+
+```
+Challenge: Select specific text ranges
+const userConfig = { name: 'John', age: 25 };
+      ^^^^^^^^^^^    Select this exact range
+Use: Visual mode + motions
+```
+
+### ✂️ Text Objects
+Learn to manipulate text efficiently using vim's text objects.
+
+#### text-objects-basic
+Practice fundamental text objects like `iw`, `aw`, `is`, `ip`.
+
+```
+Challenge: Delete inner word
+function processData(input) {
+         ^^^^^^^^^^^
+Use: diw to delete 'processData'
+```
+
+#### block-edit
+Master block operations and complex text object combinations.
+
+```
+Challenge: Change content inside braces across multiple lines
+const config = {
+  api: { url: 'test', timeout: 5000 },
+  db: { host: 'localhost', port: 3306 }
+};
+Use: ci{ and related commands
+```
+
+### 🔄 Substitution
+Master vim's powerful search and replace capabilities.
+
+#### substitute-basic
+Learn fundamental substitution patterns with `:s` command.
+
+```
+Challenge: Replace all occurrences of 'var' with 'let'
+var userName = 'john';
+var userAge = 25;
+Expected: let userName = 'john';
+```
+
+#### regex-master
+Practice advanced regular expressions in vim substitutions.
+
+```
+Challenge: Extract email domains
+Email: john.doe@example.com
+Expected: example.com
+Use: Advanced regex patterns
+```
+
+#### global-replace
+Master global search and replace across multiple lines and patterns.
+
+```
+Challenge: Convert snake_case to camelCase
+user_name → userName
+user_email → userEmail
+Use: Global substitution commands
+```
+
+### 📝 Formatting
+Learn vim's formatting and indentation commands.
+
+#### indent-master
+Practice indentation commands like `>>`, `<<`, `=`.
+
+```
+Challenge: Fix indentation
+function test() {
+local x = 1
+return x
+end
+
+Expected:
+function test() {
+    local x = 1
+    return x
+end
+```
+
+#### case-converter
+Master case conversion with `~`, `gu`, `gU`, `g~`.
+
+```
+Challenge: Convert to uppercase
+hello world → HELLO WORLD
+Use: gUiw or similar commands
+```
+
+#### join-lines
+Practice line joining with `J` and `gJ`.
+
+```
+Challenge: Join lines appropriately
+const message = 'Hello' +
+               'World';
+Expected: const message = 'Hello' + 'World';
+```
+
+### 🔢 Numbers & Operations
+Practice numeric operations and calculations in vim.
+
+#### increment-game
+Master number increment/decrement with `<C-a>` and `<C-x>`.
+
+```
+Challenge: Increment all numbers by 1
+version = 1.2.3
+Expected: version = 2.3.4
+Use: <C-a> on each number
+```
+
+#### number-sequence
+Learn to work with number sequences and patterns.
+
+```
+Challenge: Create sequence
+1
+2
+3
+Expected: 1, 2, 3, 4, 5
+Use: Various vim techniques
+```
+
+### 🏗️ Advanced Features
+Master vim's most powerful features.
+
+#### macro-recorder
+Learn to record and execute macros for repetitive tasks.
+
+```
+Challenge: Add quotes to each word
+apple
+banana
+cherry
+
+Expected:
+"apple"
+"banana"
+"cherry"
+
+Solution: qa I" <Esc> A" <Esc> j q, then @a for repetition
+```
+
+#### dot-repeat
+Master the `.` command for efficient repetition.
+
+```
+Challenge: Replace all 'x' with correct letters
+vim xs awesome
+practxce makes perfect
+
+Expected:
+vim is awesome
+practice makes perfect
+
+Use: Replace first 'x', then navigate and use '.' to repeat
+```
+
+#### fold-master
+Practice code folding techniques with `zf`, `zo`, `zc`.
+
+```
+Challenge: Fold function definitions
+function longFunction() {
+    // many lines of code
+    return result;
+}
+Use: zf motions to create folds
+```
+
+#### comment-toggle
+Learn efficient code commenting techniques.
+
+```
+Challenge: Toggle comments on selected lines
+function test() {
+    console.log('debug');
+    return true;
+}
+
+Use: gcc for line comments, gc with motions
+```
+
+### 🎪 Mixed Challenges
+Combine multiple vim skills in complex scenarios.
+
+#### speed-editing
+Complete editing tasks as quickly as possible with time limits.
+
+```
+Challenge: Add semicolons to 3 lines (Target: 8 seconds)
+let x = 1
+let y = 2
+let z = 3
+
+Expected:
+let x = 1;
+let y = 2;
+let z = 3;
+
+Scoring: 🥇 Gold ≤8s, 🥈 Silver ≤10.4s, 🥉 Bronze ≤12s
+```
+
+#### refactor-race
+Apply real-world refactoring techniques quickly and accurately.
+
+```
+Challenge: Extract magic number (Target: 12 seconds)
+function validateAge(age) {
+  return age >= 18;
+}
+
+Expected:
+const MIN_AGE = 18;
+
+function validateAge(age) {
+  return age >= MIN_AGE;
+}
+```
+
+#### vim-golf
+Complete tasks with minimum keystrokes - like golf, lower score wins.
+
+```
+Challenge: Add semicolon (Par: 2 keystrokes)
+console.log('hello')
+
+Expected:
+console.log('hello');
+
+Optimal Solution: A; (2 keystrokes)
+Scoring: 🏆 Hole-in-one (2), 🥇 Eagle (<2), 🥈 Birdie (2), 🥉 Par (≤5)
+```
+
+### 📚 Classic Games
+Traditional vim training games with modern enhancements.
+
+#### words
+Practice word navigation and manipulation.
+
+#### hjkl
+Master basic directional movement.
+
+#### relative
+Learn relative line jumping with numbers.
+
+#### whackamole
+Quick character location and case manipulation.
+
+#### ci{
+Practice "change inside" operations with various delimiters.
+
+#### snake
+A vim-controlled snake game for fun practice.
+
+## Difficulty Levels
+
+- **noob**: Basic operations with hints and guidance
+- **easy**: Simple challenges with some assistance
+- **medium**: Intermediate complexity without hints
+- **hard**: Advanced challenges requiring efficiency
+- **nightmare**: Expert-level operations
+- **tpope**: Master-level challenges (named after Tim Pope)
+
+## Commands
+
+- `:VimBeBetter` - Open the main game menu
+- `:VimBeBetter [category]` - Jump to specific category
+- `:VimBeBetter [game] [difficulty]` - Start specific game at difficulty
+
+## Configuration
+
+```lua
+-- Enable logging for debugging
+vim.g.vim_be_better_log_file = 1
+
+-- Custom difficulty preferences (optional)
+vim.g.vim_be_better_default_difficulty = "easy"
+```
+
+## Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+### Development Setup
 
 ```bash
-docker run -it --rm brandoncc/vim-be-good:stable
+# Clone your fork
+git clone https://github.com/szymonwilczek/vim-be-better.git
+cd vim-be-better
+
+# For local development, add to your neovim config:
+# ~/.config/nvim/init.lua
+vim.opt.rtp:prepend('/path/to/vim-be-better')
+
+# or add it directly to your plugin configuration by appending the path
 ```
 
-#### "Latest" image
+### Adding New Games
 
-[This image](https://github.com/brandoncc/docker-vim-be-good/blob/master/latest/Dockerfile) runs `:PlugUpdate` before running neovim. This adds about one second
-to the startup time of the game. The trade-off is that you are always playing
-the latest version of the game, as long as your machine is able to access
-Github.com to pull it.
+To add a new game, create a new file in the appropriate category directory:
+- `lua/vim-be-better/games/[category]/[game-name].lua`
+- Follow the existing game structure and patterns
+- Update `lua/vim-be-better/types.lua` to include your game
 
-```bash
-docker run -it --rm brandoncc/vim-be-good:latest
-```
+## Issues and Support
 
-## Playing the games.
+If you encounter any issues:
 
-Before doing ANYTHING at all, make sure you are in an empty file. If the file
-you are in is not empty, VimBeGood will throw an error.
+1. Enable logging: `vim.g.vim_be_better_log_file = 1`
+2. Reproduce the issue
+3. Check the log file: `:echo stdpath("data") . "/vim-be-better.log"`
+4. Create an issue with the log contents
 
-Ok, you are in an empty file, so first execute the following.
-
-```viml
-:VimBeGood
-```
-
-This will echo out the available set of games. Each game can take a set of
-options to change how it is played, the above help menu should include each game.
-
-## Future Games
-
-Please make an issue if you have a command you wish to practice and i'll make
-it into a game!!
-
-## Issues
-
-Please file an issue. But if you do, please run the logger first and paste in
-the input.
-
-To initialize the logger, add this to your vimrc
-
-```
-let g:vim_be_good_log_file = 1
-```
-
-to get the log file executed `:echo stdpath("data")` to find the path and then
-copy paste it into the issues.
-
-## Contribute
-
--   Fork
--   Create a feature branch
--   Make changes
--   Modify the configuration to use local build:
-    `~/.config/nvim/init.vim`
-
-```
-    call plug#begin('~/.vim/plugged')
-    Plug '/tmp/vim-be-good' " path to your vim-be-good fork
-    call plug#end()
-```
-
-    You can also just use nvim --cmd "set rtp+=$(pwd)" . to set your current
-    run time path
-
--   Make PR
-
-## Live on Stream
-
-Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).
-Stop by and troll away. Helpful troll hints would be to complement the size of my hands.
-
-Big shout outs to PolarMutex, Brandon CC (stands for credit card) and TEEEEEEEEEJ
-@brandoncc @bryall @tjdevries
+## Acknowledgments
+[ThePrimeagen](https://github.com/ThePrimeagen) - [vim-be-good](https://github.com/ThePrimeagen/vim-be-good)
