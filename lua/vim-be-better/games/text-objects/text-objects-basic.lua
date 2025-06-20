@@ -1,5 +1,4 @@
 local GameUtils = require("vim-be-better.game-utils")
-local log = require("vim-be-better.log")
 
 local instructions = {
     "--- Text Objects Basic ---",
@@ -311,8 +310,6 @@ local difficultyConfig = {
 local TextObjectsBasicRound = {}
 
 function TextObjectsBasicRound:new(difficulty, window)
-    log.info("TextObjectsBasicRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -333,8 +330,6 @@ function TextObjectsBasicRound:getInstructions()
 end
 
 function TextObjectsBasicRound:getConfig()
-    log.info("TextObjectsBasicRound:getConfig", self.difficulty)
-
     self:generateRound()
 
     return {
@@ -352,12 +347,6 @@ function TextObjectsBasicRound:generateRound()
     self.startText = vim.deepcopy(self.challenge.startText)
     self.expectedResult = vim.deepcopy(self.challenge.expectedResult)
     self.currentText = vim.deepcopy(self.startText)
-
-    log.info("TextObjectsBasicRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "CHALLENGE:", self.challenge.name,
-        "OPERATION:", self.challenge.operation,
-        "CURSOR:", string.format("L%dC%d", self.challenge.cursorPos.line, self.challenge.cursorPos.col))
 end
 
 function TextObjectsBasicRound:render()
@@ -409,14 +398,11 @@ function TextObjectsBasicRound:setupOperationMonitoring()
             self:onInsertLeave()
         end
     })
-
-    log.info("TextObjectsBasicRound:setupOperationMonitoring - Created augroup:", augroup_name)
 end
 
 function TextObjectsBasicRound:cleanupOperationMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("TextObjectsBasicRound:cleanupOperationMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 
@@ -427,7 +413,6 @@ function TextObjectsBasicRound:cleanupOperationMonitoring()
 end
 
 function TextObjectsBasicRound:onTextChanged()
-    log.info("TextObjectsBasicRound:onTextChanged - Text changed!")
     self.operationExecuted = true
 
     if self.checkTimer then
@@ -440,8 +425,6 @@ function TextObjectsBasicRound:onTextChanged()
 end
 
 function TextObjectsBasicRound:onInsertLeave()
-    log.info("TextObjectsBasicRound:onInsertLeave - Left insert mode!")
-
     if self.challenge.endsInInsertMode and self.operationExecuted then
         vim.defer_fn(function()
             self:checkForWin()
@@ -474,10 +457,6 @@ function TextObjectsBasicRound:checkForWin()
         end
     end
 
-    log.info("TextObjectsBasicRound:checkForWin",
-        "Expected:", vim.inspect(self.expectedResult),
-        "Actual:", vim.inspect(actual_text))
-
     local matches = true
     if #actual_text == #self.expectedResult then
         for i = 1, #self.expectedResult do
@@ -491,7 +470,6 @@ function TextObjectsBasicRound:checkForWin()
     end
 
     if matches then
-        log.info("*** TEXT OBJECTS BASIC LEVEL COMPLETED! ***")
         self:cleanupOperationMonitoring()
 
         if self.endRoundCallback then

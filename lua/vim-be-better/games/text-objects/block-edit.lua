@@ -1,7 +1,5 @@
 local GameUtils = require("vim-be-better.game-utils")
 
-local log = require("vim-be-better.log")
-
 local instructions = {
     "--- Block Edit Master ---",
     "",
@@ -314,8 +312,6 @@ local difficultyConfig = {
 local BlockEditRound = {}
 
 function BlockEditRound:new(difficulty, window)
-    log.info("BlockEditRound:new", difficulty, window)
-
     local round = {
         window = window,
         difficulty = difficulty or "easy",
@@ -335,7 +331,6 @@ function BlockEditRound:getInstructions()
 end
 
 function BlockEditRound:getConfig()
-    log.info("BlockEditRound:getConfig", self.difficulty)
     self:generateRound()
     return {
         roundTime = GameUtils.difficultyToTime[self.difficulty] or 30000,
@@ -350,13 +345,6 @@ function BlockEditRound:generateRound()
     self.challenge = config.challenges[math.random(#config.challenges)]
     self.startText = vim.deepcopy(self.challenge.startText)
     self.expectedResult = vim.deepcopy(self.challenge.expectedResult)
-
-    log.info("BlockEditRound:generateRound",
-        "DIFFICULTY:", difficultyKey,
-        "CHALLENGE:", self.challenge.name,
-        "START TEXT:", vim.inspect(self.startText),
-        "EXPECTED:", vim.inspect(self.expectedResult),
-        "CURSOR:", string.format("L%dC%d", self.challenge.cursorPos.line, self.challenge.cursorPos.col))
 end
 
 function BlockEditRound:render()
@@ -373,13 +361,8 @@ function BlockEditRound:render()
         table.insert(lines, string.format("Operation: %s", self.challenge.operation))
     end
 
-    log.info("BlockEditRound:render",
-        "RENDERED_LINES:", vim.inspect(lines))
-
     local cursorLine = self.challenge.cursorPos.line
     local cursorCol = self.challenge.cursorPos.col - 1
-
-    log.info("BlockEditRound:render", "CURSOR_POSITION:", cursorLine, cursorCol)
 
     vim.defer_fn(function()
         self:setupOperationMonitoring()
@@ -409,12 +392,9 @@ function BlockEditRound:setupOperationMonitoring()
             self:onInsertLeave()
         end
     })
-
-    log.info("BlockEditRound:setupOperationMonitoring - Created augroup:", augroup_name)
 end
 
 function BlockEditRound:onTextChanged()
-    log.info("BlockEditRound:onTextChanged - Text changed!")
     self.operationExecuted = true
 
     if self.checkTimer then
@@ -423,7 +403,6 @@ function BlockEditRound:onTextChanged()
 
     self.checkTimer = vim.fn.timer_start(300, function()
         if self:checkForWin() then
-            log.info("BlockEditRound:onTextChanged - PLAYER WON!")
             self:cleanupOperationMonitoring()
 
             if self.endRoundCallback then
@@ -434,12 +413,9 @@ function BlockEditRound:onTextChanged()
 end
 
 function BlockEditRound:onInsertLeave()
-    log.info("BlockEditRound:onInsertLeave - Left insert mode!")
-
     if self.operationExecuted then
         vim.defer_fn(function()
             if self:checkForWin() then
-                log.info("BlockEditRound:onInsertLeave - PLAYER WON!")
                 self:cleanupOperationMonitoring()
 
                 if self.endRoundCallback then
@@ -452,16 +428,10 @@ end
 
 function BlockEditRound:checkForWin()
     if not self.operationExecuted then
-        log.info("BlockEditRound:checkForWin - No operation executed yet")
         return false
     end
 
     local all_lines = self.window.buffer:getGameLines()
-
-    log.info("BlockEditRound:checkForWin",
-        "ALL_GAME_LINES:", vim.inspect(all_lines),
-        "EXPECTED_RESULT:", vim.inspect(self.expectedResult))
-
     local actual_text = {}
     local found_start = false
     local start_idx = 1
@@ -475,7 +445,6 @@ function BlockEditRound:checkForWin()
     end
 
     if not found_start then
-        log.info("BlockEditRound:checkForWin - Could not find start of text")
         return false
     end
 
@@ -483,31 +452,19 @@ function BlockEditRound:checkForWin()
         actual_text[i] = all_lines[start_idx + i - 1] or ""
     end
 
-    log.info("BlockEditRound:checkForWin",
-        "START_IDX:", start_idx,
-        "ACTUAL_TEXT:", vim.inspect(actual_text),
-        "EXPECTED_TEXT:", vim.inspect(self.expectedResult))
-
     local matches = true
     if #actual_text == #self.expectedResult then
         for i = 1, #self.expectedResult do
             if actual_text[i] ~= self.expectedResult[i] then
-                log.info("BlockEditRound:checkForWin - Mismatch at line", i,
-                    "Expected:", self.expectedResult[i],
-                    "Actual:", actual_text[i])
                 matches = false
                 break
             end
         end
     else
-        log.info("BlockEditRound:checkForWin - Length mismatch",
-            "Expected length:", #self.expectedResult,
-            "Actual length:", #actual_text)
         matches = false
     end
 
     if matches then
-        log.info("*** BLOCK EDIT LEVEL COMPLETED! ***")
         return true
     end
 
@@ -517,7 +474,6 @@ end
 function BlockEditRound:cleanupOperationMonitoring()
     if self.cursorCheckAugroup then
         pcall(vim.api.nvim_del_augroup_by_name, self.cursorCheckAugroup)
-        log.info("BlockEditRound:cleanupOperationMonitoring - Removed augroup:", self.cursorCheckAugroup)
         self.cursorCheckAugroup = nil
     end
 

@@ -1,5 +1,3 @@
-local log = require("vim-be-better.log")
-
 local instructions = {
     "This is a placeholder game.",
     "This game is coming soon!",
@@ -10,7 +8,6 @@ local instructions = {
 local PlaceholderGame = {}
 
 function PlaceholderGame:new(difficulty, window, gameName)
-    log.info("PlaceholderGame:new", "game:", gameName, "difficulty:", difficulty)
     local round = {
         window = window,
         difficulty = difficulty,
@@ -28,7 +25,6 @@ function PlaceholderGame:getInstructions()
 end
 
 function PlaceholderGame:getConfig()
-    log.info("PlaceholderGame:getConfig", self.difficulty, self.gameName)
     return {
         roundTime = 5000,
         canEndRound = true,
@@ -66,7 +62,6 @@ function PlaceholderGame:setEndRoundCallback(endRoundCallback)
 
     vim.defer_fn(function()
         if self.endRoundCallback then
-            log.info("PlaceholderGame - Auto-ending placeholder game")
             self.endRoundCallback("menu")
         end
     end, 3000)
