@@ -102,11 +102,14 @@ local difficultyConfig = {
         challenges = {
             {
                 name = "Change word",
+                fileType = "javascript",
                 startText = {
-                    "function old() {"
+                    "function old() {",
+                    "}"
                 },
                 expectedResult = {
-                    "function new() {"
+                    "function new() {",
+                    "}"
                 },
                 cursorPos = { line = 1, col = 10 },
                 par = 5,
@@ -147,6 +150,7 @@ local difficultyConfig = {
             },
             {
                 name = "Insert at beginning",
+                fileType = "javascript",
                 startText = {
                     "console.log('test');"
                 },
@@ -162,6 +166,7 @@ local difficultyConfig = {
             },
             {
                 name = "Change inside parentheses",
+                fileType = "python",
                 startText = {
                     "print(old_value)"
                 },
@@ -182,6 +187,7 @@ local difficultyConfig = {
         challenges = {
             {
                 name = "Multi-word replacement",
+                fileType = "javascript",
                 startText = {
                     "var userName = '';",
                     "var userAge = 0;",
@@ -199,11 +205,14 @@ local difficultyConfig = {
             },
             {
                 name = "Rearrange function parameters",
+                fileType = "javascript",
                 startText = {
-                    "function test(a, b, c) {"
+                    "function test(a, b, c) {",
+                    "}"
                 },
                 expectedResult = {
-                    "function test(c, a, b) {"
+                    "function test(c, a, b) {",
+                    "}"
                 },
                 cursorPos = { line = 1, col = 14 },
                 par = 15,
@@ -212,6 +221,7 @@ local difficultyConfig = {
             },
             {
                 name = "Extract number to variable",
+                fileType = "javascript",
                 startText = {
                     "if (age >= 18 && age < 65) {"
                 },
@@ -231,6 +241,7 @@ local difficultyConfig = {
         challenges = {
             {
                 name = "Complex refactoring",
+                fileType = "javascript",
                 startText = {
                     "const items = data.filter(item => item.active).map(item => item.name);"
                 },
@@ -245,6 +256,7 @@ local difficultyConfig = {
             },
             {
                 name = "Format nested object",
+                fileType = "javascript",
                 startText = {
                     "const config = {api: {url: 'test', timeout: 5000}};"
                 },
@@ -268,6 +280,7 @@ local difficultyConfig = {
         challenges = {
             {
                 name = "Advanced text manipulation",
+                fileType = "javascript",
                 startText = {
                     "function process(data) { return data.filter(x => x.active).sort((a,b) => a.name.localeCompare(b.name)).map(x => ({...x, processed: true})); }"
                 },
@@ -291,6 +304,7 @@ local difficultyConfig = {
         challenges = {
             {
                 name = "Master-level golf",
+                fileType = "javascript",
                 startText = {
                     "const a=1;const b=2;const c=3;console.log(a,b,c);"
                 },
@@ -530,6 +544,13 @@ end
 
 function VimGolfRound:setEndRoundCallback(callback)
     self.endRoundCallback = callback
+    self.winDetected = false
+
+    if self.currentChallenge and self.currentChallenge.fileType and self.window and self.window.bufh then
+        vim.schedule(function()
+            vim.api.nvim_buf_set_option(self.window.bufh, 'filetype', self.currentChallenge.fileType)
+        end)
+    end
 end
 
 return VimGolfRound
