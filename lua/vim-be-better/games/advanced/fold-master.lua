@@ -74,7 +74,7 @@ function FoldMasterRound:getConfig()
 
     vim.schedule(function()
         if self.window and self.window.bufh then
-            vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
+            vim.bo[self.window.bufh].modifiable = true
 
             if self.currentChallenge.foldSetup then
                 vim.defer_fn(function()
@@ -139,7 +139,7 @@ function FoldMasterRound:setupFoldsForChallenge()
             end
         end
 
-        for i, fold in ipairs(foldSetup.folds) do
+        for _, fold in ipairs(foldSetup.folds) do
             local adjustedStart = codeStartLine + fold.start - 1
             local adjustedEnd = codeStartLine + fold["end"] - 1
 
