@@ -340,7 +340,7 @@ function VimGolfRound:getConfig()
     self.keystrokeCount = 0
 
     return {
-        roundTime = GameUtils.difficultyToTime[self.difficulty] or 60000,
+        roundTime = 60000,
         canEndRound = true,
     }
 end
