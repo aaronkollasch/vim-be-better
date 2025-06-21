@@ -163,7 +163,7 @@ function CommentToggleRound:setEndRoundCallback(callback)
 
     if self.currentChallenge and self.currentChallenge.fileType and self.window and self.window.bufh then
         vim.schedule(function()
-            vim.api.nvim_buf_set_option(self.window.bufh, 'filetype', self.currentChallenge.fileType)
+            vim.bo[self.window.bufh].filetype = self.currentChallenge.fileType
 
             self:setupTextChangeMonitoring()
         end)
