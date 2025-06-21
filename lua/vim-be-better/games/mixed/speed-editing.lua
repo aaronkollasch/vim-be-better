@@ -321,7 +321,7 @@ end
 function SpeedEditingRound:getConfig()
     vim.schedule(function()
         if self.window and self.window.bufh then
-            vim.api.nvim_buf_set_option(self.window.bufh, 'modifiable', true)
+            vim.bo[self.window.bufh].modifiable = true
         end
     end)
 
