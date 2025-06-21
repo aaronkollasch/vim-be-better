@@ -377,7 +377,7 @@ function VimGolfRound:setupKeystrokeMonitoring()
 
     vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
-    vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+    vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "InsertLeave" }, {
         group = augroup_name,
         buffer = self.window.buffer.bufh,
         callback = function()
@@ -401,6 +401,10 @@ end
 
 function VimGolfRound:checkForWin()
     if not self.currentChallenge or self.hasWon then
+        return false
+    end
+
+    if vim.api.nvim_get_mode().mode ~= "n" then
         return false
     end
 
